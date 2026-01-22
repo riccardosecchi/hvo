@@ -1,11 +1,14 @@
-import { useTranslations } from "next-intl";
+import { Hero } from "@/components/home/hero";
+import { EventsList } from "@/components/events";
+import { getActiveEvents } from "@/lib/supabase/queries";
 
-export default function HomePage() {
-  const t = useTranslations("hero");
+export default async function HomePage() {
+  const events = await getActiveEvents();
 
   return (
-    <main className="min-h-screen flex items-center justify-center">
-      <h1 className="text-4xl font-bold text-primary">{t("tagline")}</h1>
-    </main>
+    <>
+      <Hero />
+      <EventsList events={events} />
+    </>
   );
 }
