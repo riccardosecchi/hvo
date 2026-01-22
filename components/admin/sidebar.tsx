@@ -14,10 +14,10 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface SidebarProps {
   locale: string;
@@ -44,16 +44,24 @@ function NavContent({
 }) {
   return (
     <>
-      <div className="p-4 border-b border-border/50">
-        <Image
-          src="/logos/04_HVO.jpg"
-          alt="HVO"
-          width={100}
-          height={40}
-          className="h-8 w-auto"
-        />
+      {/* Logo */}
+      <div className="p-6 border-b border-[var(--hvo-border)]">
+        <Link href="/" className="block">
+          <Image
+            src="/logos/04_HVO.jpg"
+            alt="HVO"
+            width={48}
+            height={48}
+            className="h-12 w-12 object-cover rounded-lg"
+            style={{
+              boxShadow: "0 0 20px rgba(0, 229, 255, 0.2)",
+            }}
+          />
+        </Link>
       </div>
-      <nav className="flex-1 p-4 space-y-2">
+
+      {/* Navigation */}
+      <nav className="flex-1 p-4 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
@@ -63,27 +71,39 @@ function NavContent({
               href={item.href}
               onClick={onLinkClick}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+                "relative flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-300",
                 isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "text-[var(--hvo-cyan)]"
+                  : "text-[var(--hvo-text-muted)] hover:text-[var(--hvo-text-secondary)]"
               )}
             >
-              <Icon className="h-5 w-5" />
-              {item.label}
+              {/* Active indicator */}
+              {isActive && (
+                <motion.div
+                  layoutId="activeNav"
+                  className="absolute inset-0 rounded-xl bg-[var(--hvo-cyan)]/10 border border-[var(--hvo-cyan)]/20"
+                  style={{
+                    boxShadow: "0 0 20px rgba(0, 229, 255, 0.1)",
+                  }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                />
+              )}
+              <Icon className={cn("h-5 w-5 relative z-10", isActive && "drop-shadow-[0_0_8px_rgba(0,229,255,0.5)]")} />
+              <span className="relative z-10">{item.label}</span>
             </Link>
           );
         })}
       </nav>
-      <div className="p-4 border-t border-border/50">
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-muted-foreground hover:text-foreground"
+
+      {/* Logout */}
+      <div className="p-4 border-t border-[var(--hvo-border)]">
+        <button
           onClick={onLogout}
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-[var(--hvo-text-muted)] hover:text-[var(--hvo-magenta)] hover:bg-[var(--hvo-magenta)]/10 transition-all duration-300"
         >
-          <LogOut className="h-5 w-5 mr-3" />
+          <LogOut className="h-5 w-5" />
           {logoutLabel}
-        </Button>
+        </button>
       </div>
     </>
   );
@@ -114,41 +134,49 @@ export function Sidebar({ locale }: SidebarProps) {
   return (
     <>
       {/* Mobile menu button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="fixed top-4 left-4 z-50 md:hidden"
+      <button
+        className="fixed top-4 left-4 z-50 p-3 rounded-xl bg-[var(--hvo-surface)] border border-[var(--hvo-border)] text-[var(--hvo-text-secondary)] md:hidden hover:border-[var(--hvo-cyan)]/30 transition-colors"
         onClick={() => setMobileOpen(!mobileOpen)}
       >
-        {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </Button>
+        {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
 
       {/* Mobile overlay */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden"
-          onClick={closeMobile}
-        />
-      )}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-[var(--hvo-void)]/80 backdrop-blur-sm z-40 md:hidden"
+            onClick={closeMobile}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Mobile sidebar */}
-      <aside
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border/50 transform transition-transform md:hidden flex flex-col",
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.aside
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed inset-y-0 left-0 z-50 w-72 bg-[var(--hvo-deep)] border-r border-[var(--hvo-border)] flex flex-col md:hidden"
+          >
+            <NavContent
+              navItems={navItems}
+              pathname={pathname}
+              onLinkClick={closeMobile}
+              onLogout={handleLogout}
+              logoutLabel={t("logout")}
+            />
+          </motion.aside>
         )}
-      >
-        <NavContent
-          navItems={navItems}
-          pathname={pathname}
-          onLinkClick={closeMobile}
-          onLogout={handleLogout}
-          logoutLabel={t("logout")}
-        />
-      </aside>
+      </AnimatePresence>
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex fixed inset-y-0 left-0 w-64 bg-card border-r border-border/50 flex-col">
+      <aside className="hidden md:flex fixed inset-y-0 left-0 w-72 bg-[var(--hvo-deep)]/80 backdrop-blur-xl border-r border-[var(--hvo-border)] flex-col">
         <NavContent
           navItems={navItems}
           pathname={pathname}

@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
-import { CalendarDays, CheckCircle, Clock } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CalendarDays, CheckCircle, Clock, TrendingUp } from "lucide-react";
 
 export default async function DashboardPage() {
   const t = await getTranslations("admin.nav");
@@ -23,43 +22,116 @@ export default async function DashboardPage() {
       title: "Total Events",
       value: totalEvents,
       icon: CalendarDays,
-      color: "text-primary",
+      color: "var(--hvo-cyan)",
+      bgColor: "rgba(0, 229, 255, 0.1)",
     },
     {
       title: "Active Events",
       value: activeEvents,
       icon: CheckCircle,
-      color: "text-green-500",
+      color: "#22C55E",
+      bgColor: "rgba(34, 197, 94, 0.1)",
     },
     {
       title: "Pending Invites",
       value: pendingInvites,
       icon: Clock,
-      color: "text-yellow-500",
+      color: "var(--hvo-magenta)",
+      bgColor: "rgba(233, 30, 140, 0.1)",
     },
   ];
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-8">{t("dashboard")}</h1>
+      {/* Header */}
+      <div className="mb-10">
+        <h1 className="text-3xl md:text-4xl font-display tracking-wide text-white mb-2">
+          {t("dashboard")}
+        </h1>
+        <p className="text-[var(--hvo-text-muted)]">
+          Overview of your events and admin activity
+        </p>
+      </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      {/* Stats Grid */}
+      <div className="grid gap-6 md:grid-cols-3">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title} className="bg-card/50 border-border/50">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+            <div
+              key={stat.title}
+              className="relative group rounded-2xl bg-[var(--hvo-surface)]/60 backdrop-blur-sm border border-[var(--hvo-border)] p-6 transition-all duration-300 hover:border-[var(--hvo-cyan)]/30"
+            >
+              {/* Hover glow */}
+              <div
+                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                style={{
+                  background: `radial-gradient(circle at center, ${stat.bgColor} 0%, transparent 70%)`,
+                }}
+              />
+
+              <div className="relative">
+                {/* Icon */}
+                <div
+                  className="inline-flex p-3 rounded-xl mb-4"
+                  style={{ backgroundColor: stat.bgColor }}
+                >
+                  <Icon className="h-6 w-6" style={{ color: stat.color }} />
+                </div>
+
+                {/* Value */}
+                <p className="text-4xl font-display tracking-wide text-white mb-2">
+                  {stat.value}
+                </p>
+
+                {/* Title */}
+                <p className="text-sm text-[var(--hvo-text-muted)] font-medium">
                   {stat.title}
-                </CardTitle>
-                <Icon className={`h-5 w-5 ${stat.color}`} />
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{stat.value}</p>
-              </CardContent>
-            </Card>
+                </p>
+              </div>
+            </div>
           );
         })}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="mt-10">
+        <h2 className="text-lg font-display tracking-wide text-white mb-4">
+          Quick Actions
+        </h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <a
+            href="events"
+            className="flex items-center gap-4 p-4 rounded-xl bg-[var(--hvo-deep)] border border-[var(--hvo-border)] hover:border-[var(--hvo-cyan)]/30 transition-all duration-300 group"
+          >
+            <div className="p-3 rounded-lg bg-[var(--hvo-cyan)]/10 group-hover:bg-[var(--hvo-cyan)]/20 transition-colors">
+              <CalendarDays className="h-5 w-5 text-[var(--hvo-cyan)]" />
+            </div>
+            <div>
+              <p className="font-medium text-white">Manage Events</p>
+              <p className="text-sm text-[var(--hvo-text-muted)]">
+                Create, edit, or delete events
+              </p>
+            </div>
+            <TrendingUp className="h-5 w-5 text-[var(--hvo-text-muted)] ml-auto group-hover:text-[var(--hvo-cyan)] transition-colors" />
+          </a>
+
+          <a
+            href="users"
+            className="flex items-center gap-4 p-4 rounded-xl bg-[var(--hvo-deep)] border border-[var(--hvo-border)] hover:border-[var(--hvo-magenta)]/30 transition-all duration-300 group"
+          >
+            <div className="p-3 rounded-lg bg-[var(--hvo-magenta)]/10 group-hover:bg-[var(--hvo-magenta)]/20 transition-colors">
+              <Clock className="h-5 w-5 text-[var(--hvo-magenta)]" />
+            </div>
+            <div>
+              <p className="font-medium text-white">Invite Admins</p>
+              <p className="text-sm text-[var(--hvo-text-muted)]">
+                Manage admin invitations
+              </p>
+            </div>
+            <TrendingUp className="h-5 w-5 text-[var(--hvo-text-muted)] ml-auto group-hover:text-[var(--hvo-magenta)] transition-colors" />
+          </a>
+        </div>
       </div>
     </div>
   );

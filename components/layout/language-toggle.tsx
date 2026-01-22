@@ -3,6 +3,7 @@
 import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 import { useTransition } from "react";
+import { motion } from "framer-motion";
 
 export function LanguageToggle() {
   const locale = useLocale();
@@ -23,13 +24,38 @@ export function LanguageToggle() {
     <button
       onClick={toggleLocale}
       disabled={isPending}
-      className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted/50 backdrop-blur-sm border border-border/50 text-sm font-medium transition-all hover:bg-muted hover:border-border disabled:opacity-50"
+      className="relative flex items-center gap-0.5 px-1 py-1 rounded-full bg-[var(--hvo-surface)] border border-[var(--hvo-border)] text-sm font-display tracking-wider transition-all hover:border-[var(--hvo-cyan)] disabled:opacity-50 overflow-hidden"
     >
-      <span className={locale === "it" ? "text-primary" : "text-muted-foreground"}>
+      {/* Animated background pill */}
+      <motion.div
+        layoutId="locale-pill"
+        className="absolute h-[calc(100%-4px)] w-[calc(50%-2px)] rounded-full bg-[var(--hvo-cyan)]"
+        initial={false}
+        animate={{
+          x: locale === "it" ? 2 : "calc(100% + 2px)",
+        }}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        style={{
+          boxShadow: "0 0 10px rgba(0, 229, 255, 0.4)",
+        }}
+      />
+
+      <span
+        className={`relative z-10 px-3 py-1 transition-colors duration-200 ${
+          locale === "it"
+            ? "text-[var(--hvo-void)]"
+            : "text-[var(--hvo-text-muted)]"
+        }`}
+      >
         IT
       </span>
-      <span className="text-muted-foreground">/</span>
-      <span className={locale === "en" ? "text-primary" : "text-muted-foreground"}>
+      <span
+        className={`relative z-10 px-3 py-1 transition-colors duration-200 ${
+          locale === "en"
+            ? "text-[var(--hvo-void)]"
+            : "text-[var(--hvo-text-muted)]"
+        }`}
+      >
         EN
       </span>
     </button>

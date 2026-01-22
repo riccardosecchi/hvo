@@ -2,14 +2,9 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import { Inter } from "next/font/google";
 import { Header, Footer } from "@/components/layout";
+import { ParticleBackground } from "@/components/effects";
 import type { Metadata } from "next";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
 
 export async function generateMetadata({
   params,
@@ -65,10 +60,16 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className="dark">
-      <body className={`${inter.variable} font-sans min-h-screen flex flex-col`}>
+      <body className="min-h-screen flex flex-col overflow-x-hidden">
         <NextIntlClientProvider messages={messages}>
+          {/* Background Effects */}
+          <div className="mesh-gradient" />
+          <ParticleBackground />
+          <div className="noise-overlay" />
+
+          {/* Content */}
           <Header locale={locale} />
-          <main className="flex-1 pt-16">{children}</main>
+          <main className="flex-1 relative z-10">{children}</main>
           <Footer />
         </NextIntlClientProvider>
       </body>
