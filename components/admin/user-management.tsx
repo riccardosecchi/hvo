@@ -20,7 +20,6 @@ interface UserManagementProps {
 
 export function UserManagement({ invites, profiles, isMasterAdmin, locale }: UserManagementProps) {
   const t = useTranslations("admin.users");
-  const tCommon = useTranslations("common");
   const router = useRouter();
 
   const [email, setEmail] = useState("");
