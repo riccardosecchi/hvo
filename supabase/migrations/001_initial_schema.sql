@@ -1,9 +1,6 @@
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 -- Create events table
 CREATE TABLE public.events (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   name TEXT NOT NULL,
   date DATE NOT NULL,
@@ -25,7 +22,7 @@ CREATE TABLE public.profiles (
 
 -- Create admin_invites table
 CREATE TABLE public.admin_invites (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   email TEXT NOT NULL UNIQUE,
   invitation_token TEXT NOT NULL UNIQUE,
