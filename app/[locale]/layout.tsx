@@ -4,11 +4,45 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { Inter } from "next/font/google";
 import { Header, Footer } from "@/components/layout";
+import type { Metadata } from "next";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
 });
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+
+  const title = "HVO Events";
+  const description =
+    locale === "it"
+      ? "Eventi underground di musica elettronica - Tech House, House, Latin House, Techno"
+      : "Underground electronic music events - Tech House, House, Latin House, Techno";
+
+  return {
+    title: {
+      default: title,
+      template: `%s | ${title}`,
+    },
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      locale: locale === "it" ? "it_IT" : "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
