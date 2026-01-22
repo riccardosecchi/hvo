@@ -3,6 +3,7 @@ import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { Inter } from "next/font/google";
+import { Header, Footer } from "@/components/layout";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,9 +31,11 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className="dark">
-      <body className={`${inter.variable} font-sans min-h-screen`}>
+      <body className={`${inter.variable} font-sans min-h-screen flex flex-col`}>
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <Header locale={locale} />
+          <main className="flex-1 pt-16">{children}</main>
+          <Footer />
         </NextIntlClientProvider>
       </body>
     </html>
