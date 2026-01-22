@@ -1,0 +1,78 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "back": "Back"
+  },
+  "nav": {
+    "events": "Events",
+    "admin": "Admin"
+  },
+  "hero": {
+    "tagline": "HVO events"
+  },
+  "events": {
+    "title": "Events",
+    "book": "Book Now",
+    "noEvents": "No upcoming events",
+    "location": "Location",
+    "date": "Date",
+    "time": "Time"
+  },
+  "footer": {
+    "copyright": "© 2025 HVO events"
+  },
+  "admin": {
+    "login": {
+      "title": "Sign In",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign In",
+      "error": "Invalid credentials"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "events": "Events",
+      "users": "Users",
+      "profile": "Profile",
+      "logout": "Sign Out"
+    },
+    "events": {
+      "title": "Event Management",
+      "new": "New Event",
+      "name": "Event Name",
+      "location": "Location",
+      "date": "Date",
+      "time": "Time",
+      "bookingLink": "Booking Link",
+      "isActive": "Event Active",
+      "isBookingOpen": "Bookings Open",
+      "image": "Image",
+      "uploadImage": "Upload Image",
+      "deleteConfirm": "Are you sure you want to delete this event?"
+    },
+    "users": {
+      "title": "User Management",
+      "invite": "Invite Admin",
+      "generateLink": "Generate Link",
+      "copyLink": "Copy Link",
+      "pending": "Pending Confirmation",
+      "confirmed": "Confirmed Admins",
+      "confirmUser": "Confirm",
+      "linkCopied": "Link copied!"
+    },
+    "profile": {
+      "title": "Profile",
+      "changePassword": "Change Password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "passwordChanged": "Password updated successfully"
+    }
+  }
+}

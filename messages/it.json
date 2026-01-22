@@ -1,0 +1,78 @@
+{
+  "common": {
+    "loading": "Caricamento...",
+    "error": "Si è verificato un errore",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "confirm": "Conferma",
+    "back": "Indietro"
+  },
+  "nav": {
+    "events": "Eventi",
+    "admin": "Admin"
+  },
+  "hero": {
+    "tagline": "HVO events"
+  },
+  "events": {
+    "title": "Eventi",
+    "book": "Prenotati",
+    "noEvents": "Nessun evento in programma",
+    "location": "Luogo",
+    "date": "Data",
+    "time": "Ora"
+  },
+  "footer": {
+    "copyright": "© 2025 HVO events"
+  },
+  "admin": {
+    "login": {
+      "title": "Accedi",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Accedi",
+      "error": "Credenziali non valide"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "events": "Eventi",
+      "users": "Utenti",
+      "profile": "Profilo",
+      "logout": "Esci"
+    },
+    "events": {
+      "title": "Gestione Eventi",
+      "new": "Nuovo Evento",
+      "name": "Nome Evento",
+      "location": "Luogo",
+      "date": "Data",
+      "time": "Ora",
+      "bookingLink": "Link Prenotazione",
+      "isActive": "Evento Attivo",
+      "isBookingOpen": "Prenotazioni Aperte",
+      "image": "Immagine",
+      "uploadImage": "Carica Immagine",
+      "deleteConfirm": "Sei sicuro di voler eliminare questo evento?"
+    },
+    "users": {
+      "title": "Gestione Utenti",
+      "invite": "Invita Admin",
+      "generateLink": "Genera Link",
+      "copyLink": "Copia Link",
+      "pending": "In Attesa di Conferma",
+      "confirmed": "Admin Confermati",
+      "confirmUser": "Conferma",
+      "linkCopied": "Link copiato!"
+    },
+    "profile": {
+      "title": "Profilo",
+      "changePassword": "Cambia Password",
+      "currentPassword": "Password Attuale",
+      "newPassword": "Nuova Password",
+      "confirmPassword": "Conferma Password",
+      "passwordChanged": "Password aggiornata con successo"
+    }
+  }
+}
