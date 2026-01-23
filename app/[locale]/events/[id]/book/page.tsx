@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
 import { Calendar, Clock, MapPin, Loader2, CheckCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import type { Event, EventBookingField } from "@/lib/database.types";
-import { getEventBookingFields, createBooking } from "@/lib/supabase/bookings";
+import { getEventBookingFields } from "@/lib/supabase/bookings";
+import { submitBooking } from "@/lib/actions/booking";
 import { CosmicButton } from "@/components/ui/cosmic-button";
 
 interface BookingPageProps {
@@ -17,7 +17,6 @@ interface BookingPageProps {
 
 export default function BookingPage({ params }: BookingPageProps) {
     const { locale, id } = use(params);
-    const router = useRouter();
 
     const [event, setEvent] = useState<Event | null>(null);
     const [fields, setFields] = useState<EventBookingField[]>([]);
@@ -57,22 +56,24 @@ export default function BookingPage({ params }: BookingPageProps) {
         setFormData((prev) => ({ ...prev, [fieldName]: value }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError(null);
-
-        // Validate required fields
-        for (const field of fields) {
-            if (field.is_required && !formData[field.field_name]?.trim()) {
-                setError(`Il campo "${field.field_label}" è obbligatorio`);
-                return;
-            }
-        }
-
         setSubmitting(true);
+
         try {
-            await createBooking(id, formData);
-            setSubmitted(true);
+            // Create FormData from the form element
+            const form = e.currentTarget;
+            const formDataObj = new FormData(form);
+
+            // Submit via server action
+            const result = await submitBooking(formDataObj);
+
+            if (result.success) {
+                setSubmitted(true);
+            } else {
+                setError(result.error || "Errore durante l'invio. Riprova.");
+            }
         } catch (err) {
             setError("Errore durante l'invio. Riprova.");
             console.error(err);
@@ -200,6 +201,42 @@ export default function BookingPage({ params }: BookingPageProps) {
                     </h2>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
+                        {/* Hidden event ID */}
+                        <input type="hidden" name="eventId" value={id} />
+
+                        {/* HONEYPOT FIELDS - Hidden from humans, visible to bots */}
+                        <div
+                            aria-hidden="true"
+                            style={{
+                                position: 'absolute',
+                                left: '-9999px',
+                                top: '-9999px',
+                            }}
+                        >
+                            <label htmlFor="website">Website</label>
+                            <input
+                                type="text"
+                                id="website"
+                                name="website"
+                                tabIndex={-1}
+                                autoComplete="off"
+                            />
+                        </div>
+                        <div
+                            aria-hidden="true"
+                            style={{ display: 'none' }}
+                        >
+                            <label htmlFor="phone_confirm">Confirm Phone</label>
+                            <input
+                                type="text"
+                                id="phone_confirm"
+                                name="phone_confirm"
+                                tabIndex={-1}
+                                autoComplete="off"
+                            />
+                        </div>
+
+                        {/* Dynamic Form Fields */}
                         {fields.map((field) => (
                             <div key={field.id} className="space-y-2">
                                 <label className="block text-sm font-medium text-[var(--text-secondary)]">
@@ -211,16 +248,19 @@ export default function BookingPage({ params }: BookingPageProps) {
 
                                 {field.field_type === "textarea" ? (
                                     <textarea
+                                        name={field.field_name}
                                         value={formData[field.field_name] || ""}
                                         onChange={(e) =>
                                             handleInputChange(field.field_name, e.target.value)
                                         }
                                         required={field.is_required}
                                         rows={4}
+                                        maxLength={1000}
                                         className="w-full px-4 py-3 bg-[var(--surface-2)] border border-white/[0.06] rounded-lg text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]/50 resize-none"
                                     />
                                 ) : field.field_type === "select" ? (
                                     <select
+                                        name={field.field_name}
                                         value={formData[field.field_name] || ""}
                                         onChange={(e) =>
                                             handleInputChange(field.field_name, e.target.value)
@@ -238,11 +278,13 @@ export default function BookingPage({ params }: BookingPageProps) {
                                 ) : (
                                     <input
                                         type={field.field_type}
+                                        name={field.field_name}
                                         value={formData[field.field_name] || ""}
                                         onChange={(e) =>
                                             handleInputChange(field.field_name, e.target.value)
                                         }
                                         required={field.is_required}
+                                        maxLength={field.field_type === 'email' ? 254 : 500}
                                         className="w-full px-4 py-3 bg-[var(--surface-2)] border border-white/[0.06] rounded-lg text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]/50"
                                     />
                                 )}
