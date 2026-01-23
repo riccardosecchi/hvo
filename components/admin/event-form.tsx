@@ -4,19 +4,21 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
-import { Upload, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Upload,
+  X,
+  Calendar,
+  Clock,
+  MapPin,
+  Link as LinkIcon,
+  Type,
+  ImageIcon
+} from "lucide-react";
 import Image from "next/image";
 import type { Event } from "@/lib/database.types";
+import { CosmicInput } from "@/components/ui/cosmic-input";
+import { CosmicButton } from "@/components/ui/cosmic-button";
 
 interface EventFormProps {
   event: Event | null;
@@ -117,163 +119,221 @@ export function EventForm({ event, open, onClose }: EventFormProps) {
     setImagePreview(event?.image_url || "");
   };
 
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        resetForm();
-        onClose();
-      }
-    }}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{event ? tCommon("edit") : t("new")}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Image upload */}
-          <div className="space-y-2">
-            <Label>{t("image")}</Label>
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="relative border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
-            >
-              {imagePreview ? (
-                <div className="relative aspect-video">
-                  <Image
-                    src={imagePreview}
-                    alt="Preview"
-                    fill
-                    className="object-cover rounded"
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleClose}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+          />
+
+          {/* Modal */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-4 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-50 sm:w-full sm:max-w-lg max-h-[90vh] overflow-hidden rounded-2xl"
+          >
+            <div className="relative h-full flex flex-col rounded-2xl overflow-hidden">
+              {/* Gradient border */}
+              <div className="absolute inset-0 rounded-2xl p-[1px] bg-gradient-to-br from-[var(--hvo-cyan)]/30 via-transparent to-[var(--hvo-magenta)]/30">
+                <div className="absolute inset-[1px] rounded-2xl bg-[var(--hvo-surface)]" />
+              </div>
+
+              {/* Content */}
+              <div className="relative flex-1 overflow-y-auto">
+                {/* Header */}
+                <div className="sticky top-0 z-10 bg-[var(--hvo-surface)] border-b border-[var(--hvo-border)] px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-display tracking-wide text-white">
+                      {event ? tCommon("edit") : t("new")}
+                    </h2>
+                    <button
+                      onClick={handleClose}
+                      className="p-2 rounded-lg text-[var(--hvo-text-muted)] hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                  {/* Image upload */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-[var(--hvo-text-secondary)]">
+                      {t("image")}
+                    </label>
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="relative border-2 border-dashed border-[var(--hvo-border)] rounded-xl overflow-hidden cursor-pointer hover:border-[var(--hvo-cyan)]/50 transition-colors group"
+                    >
+                      {imagePreview ? (
+                        <div className="relative aspect-video">
+                          <Image
+                            src={imagePreview}
+                            alt="Preview"
+                            fill
+                            className="object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <p className="text-white text-sm font-medium">Click to change</p>
+                          </div>
+                          <button
+                            type="button"
+                            className="absolute top-3 right-3 p-2 rounded-lg bg-[var(--hvo-magenta)] text-white hover:bg-[var(--hvo-magenta)]/80 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setImageFile(null);
+                              setImagePreview("");
+                              setImageUrl("");
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="py-10 flex flex-col items-center gap-3 text-[var(--hvo-text-muted)]">
+                          <div className="p-3 rounded-xl bg-[var(--hvo-cyan)]/10 group-hover:bg-[var(--hvo-cyan)]/20 transition-colors">
+                            <ImageIcon className="h-6 w-6 text-[var(--hvo-cyan)]" />
+                          </div>
+                          <p className="text-sm">{t("uploadImage")}</p>
+                        </div>
+                      )}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+
+                  <CosmicInput
+                    label={t("name")}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Event name"
+                    icon={<Type className="h-5 w-5" />}
+                    required
                   />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setImageFile(null);
-                      setImagePreview("");
-                      setImageUrl("");
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="py-8">
-                  <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">{t("uploadImage")}</p>
-                </div>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
+
+                  <CosmicInput
+                    label={t("location")}
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="Venue location"
+                    icon={<MapPin className="h-5 w-5" />}
+                    required
+                  />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <CosmicInput
+                      label={t("date")}
+                      type="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      icon={<Calendar className="h-5 w-5" />}
+                      required
+                    />
+                    <CosmicInput
+                      label={t("time")}
+                      type="time"
+                      value={time}
+                      onChange={(e) => setTime(e.target.value)}
+                      icon={<Clock className="h-5 w-5" />}
+                      required
+                    />
+                  </div>
+
+                  <CosmicInput
+                    label={t("bookingLink")}
+                    type="url"
+                    value={bookingLink}
+                    onChange={(e) => setBookingLink(e.target.value)}
+                    placeholder="https://..."
+                    icon={<LinkIcon className="h-5 w-5" />}
+                  />
+
+                  {/* Toggle switches */}
+                  <div className="space-y-4 pt-2">
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--hvo-deep)] border border-[var(--hvo-border)]">
+                      <div>
+                        <p className="text-sm font-medium text-white">{t("isActive")}</p>
+                        <p className="text-xs text-[var(--hvo-text-muted)]">Show event on homepage</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsActive(!isActive)}
+                        className={`relative w-12 h-7 rounded-full transition-colors ${
+                          isActive ? "bg-[var(--hvo-cyan)]" : "bg-[var(--hvo-surface)]"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                            isActive ? "translate-x-5" : ""
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--hvo-deep)] border border-[var(--hvo-border)]">
+                      <div>
+                        <p className="text-sm font-medium text-white">{t("isBookingOpen")}</p>
+                        <p className="text-xs text-[var(--hvo-text-muted)]">Enable booking button</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsBookingOpen(!isBookingOpen)}
+                        className={`relative w-12 h-7 rounded-full transition-colors ${
+                          isBookingOpen ? "bg-[var(--hvo-magenta)]" : "bg-[var(--hvo-surface)]"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                            isBookingOpen ? "translate-x-5" : ""
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-3 pt-4">
+                    <CosmicButton
+                      type="button"
+                      variant="ghost"
+                      onClick={handleClose}
+                      className="flex-1"
+                    >
+                      {tCommon("cancel")}
+                    </CosmicButton>
+                    <CosmicButton
+                      type="submit"
+                      loading={loading}
+                      className="flex-1"
+                    >
+                      {loading ? "Saving..." : tCommon("save")}
+                    </CosmicButton>
+                  </div>
+                </form>
+              </div>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="name">{t("name")}</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="bg-input border-border"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="location">{t("location")}</Label>
-            <Input
-              id="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              required
-              className="bg-input border-border"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date">{t("date")}</Label>
-              <Input
-                id="date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-                className="bg-input border-border"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="time">{t("time")}</Label>
-              <Input
-                id="time"
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                required
-                className="bg-input border-border"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="bookingLink">{t("bookingLink")}</Label>
-            <Input
-              id="bookingLink"
-              type="url"
-              value={bookingLink}
-              onChange={(e) => setBookingLink(e.target.value)}
-              placeholder="https://"
-              className="bg-input border-border"
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor="isActive">{t("isActive")}</Label>
-            <Switch
-              id="isActive"
-              checked={isActive}
-              onCheckedChange={setIsActive}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor="isBookingOpen">{t("isBookingOpen")}</Label>
-            <Switch
-              id="isBookingOpen"
-              checked={isBookingOpen}
-              onCheckedChange={setIsBookingOpen}
-            />
-          </div>
-
-          <div className="flex gap-2 pt-4">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                resetForm();
-                onClose();
-              }}
-              className="flex-1"
-            >
-              {tCommon("cancel")}
-            </Button>
-            <Button
-              type="submit"
-              className="flex-1 bg-primary text-primary-foreground"
-              disabled={loading}
-            >
-              {loading ? "..." : tCommon("save")}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
