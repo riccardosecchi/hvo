@@ -31,13 +31,22 @@ export async function middleware(request: NextRequest) {
       intlResponse.cookies.set(cookie.name, cookie.value, cookie);
     });
 
+    // Add pathname header for layout to detect admin routes
+    intlResponse.headers.set("x-pathname", pathname);
+
     return intlResponse;
   }
 
   // For non-admin routes, just apply intl middleware
-  return intlMiddleware(request);
+  const response = intlMiddleware(request);
+
+  // Add pathname header for layout
+  response.headers.set("x-pathname", pathname);
+
+  return response;
 }
 
 export const config = {
   matcher: ["/", "/(it|en)/:path*"],
 };
+

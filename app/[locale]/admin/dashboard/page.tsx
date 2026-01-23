@@ -1,12 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
-import { CalendarDays, CheckCircle, Clock, TrendingUp } from "lucide-react";
+import { CalendarDays, CheckCircle, Clock, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   const t = await getTranslations("admin.nav");
   const supabase = await createClient();
 
-  // Fetch stats
   const [eventsResult, activeEventsResult, invitesResult] = await Promise.all([
     supabase.from("events").select("id", { count: "exact" }),
     supabase.from("events").select("id", { count: "exact" }).eq("is_active", true),
@@ -22,115 +22,81 @@ export default async function DashboardPage() {
       title: "Total Events",
       value: totalEvents,
       icon: CalendarDays,
-      color: "var(--hvo-cyan)",
-      bgColor: "rgba(0, 229, 255, 0.1)",
     },
     {
       title: "Active Events",
       value: activeEvents,
       icon: CheckCircle,
-      color: "#22C55E",
-      bgColor: "rgba(34, 197, 94, 0.1)",
     },
     {
       title: "Pending Invites",
       value: pendingInvites,
       icon: Clock,
-      color: "var(--hvo-magenta)",
-      bgColor: "rgba(233, 30, 140, 0.1)",
     },
   ];
 
   return (
-    <div>
+    <div className="max-w-4xl">
       {/* Header */}
-      <div className="mb-10">
-        <h1 className="text-3xl md:text-4xl font-display tracking-wide text-white mb-2">
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-white">
           {t("dashboard")}
         </h1>
-        <p className="text-[var(--hvo-text-muted)]">
-          Overview of your events and admin activity
+        <p className="text-sm text-[var(--text-muted)] mt-1">
+          Overview of your events and activity
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-6 md:grid-cols-3">
+      {/* Stats */}
+      <div className="grid gap-4 sm:grid-cols-3 mb-8">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
             <div
               key={stat.title}
-              className="relative group rounded-2xl bg-[var(--hvo-surface)]/60 backdrop-blur-sm border border-[var(--hvo-border)] p-6 transition-all duration-300 hover:border-[var(--hvo-cyan)]/30"
+              className="p-5 rounded-lg bg-[var(--surface-1)] border border-white/10"
             >
-              {/* Hover glow */}
-              <div
-                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                style={{
-                  background: `radial-gradient(circle at center, ${stat.bgColor} 0%, transparent 70%)`,
-                }}
-              />
-
-              <div className="relative">
-                {/* Icon */}
-                <div
-                  className="inline-flex p-3 rounded-xl mb-4"
-                  style={{ backgroundColor: stat.bgColor }}
-                >
-                  <Icon className="h-6 w-6" style={{ color: stat.color }} />
-                </div>
-
-                {/* Value */}
-                <p className="text-4xl font-display tracking-wide text-white mb-2">
-                  {stat.value}
-                </p>
-
-                {/* Title */}
-                <p className="text-sm text-[var(--hvo-text-muted)] font-medium">
+              <div className="flex items-center gap-3 mb-3">
+                <Icon className="w-4 h-4 text-[var(--text-muted)]" />
+                <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">
                   {stat.title}
-                </p>
+                </span>
               </div>
+              <p className="text-3xl font-semibold text-white tabular-nums">
+                {stat.value}
+              </p>
             </div>
           );
         })}
       </div>
 
       {/* Quick Actions */}
-      <div className="mt-10">
-        <h2 className="text-lg font-display tracking-wide text-white mb-4">
+      <div>
+        <h2 className="text-sm font-medium text-[var(--text-secondary)] mb-4">
           Quick Actions
         </h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          <a
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Link
             href="events"
-            className="flex items-center gap-4 p-4 rounded-xl bg-[var(--hvo-deep)] border border-[var(--hvo-border)] hover:border-[var(--hvo-cyan)]/30 transition-all duration-300 group"
+            className="flex items-center justify-between p-4 rounded-lg bg-[var(--surface-1)] border border-white/10 hover:border-[var(--accent)]/30 transition-colors group"
           >
-            <div className="p-3 rounded-lg bg-[var(--hvo-cyan)]/10 group-hover:bg-[var(--hvo-cyan)]/20 transition-colors">
-              <CalendarDays className="h-5 w-5 text-[var(--hvo-cyan)]" />
+            <div className="flex items-center gap-3">
+              <CalendarDays className="w-4 h-4 text-[var(--accent)]" />
+              <span className="text-sm text-white">Manage Events</span>
             </div>
-            <div>
-              <p className="font-medium text-white">Manage Events</p>
-              <p className="text-sm text-[var(--hvo-text-muted)]">
-                Create, edit, or delete events
-              </p>
-            </div>
-            <TrendingUp className="h-5 w-5 text-[var(--hvo-text-muted)] ml-auto group-hover:text-[var(--hvo-cyan)] transition-colors" />
-          </a>
+            <ArrowRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors" />
+          </Link>
 
-          <a
+          <Link
             href="users"
-            className="flex items-center gap-4 p-4 rounded-xl bg-[var(--hvo-deep)] border border-[var(--hvo-border)] hover:border-[var(--hvo-magenta)]/30 transition-all duration-300 group"
+            className="flex items-center justify-between p-4 rounded-lg bg-[var(--surface-1)] border border-white/10 hover:border-[var(--accent)]/30 transition-colors group"
           >
-            <div className="p-3 rounded-lg bg-[var(--hvo-magenta)]/10 group-hover:bg-[var(--hvo-magenta)]/20 transition-colors">
-              <Clock className="h-5 w-5 text-[var(--hvo-magenta)]" />
+            <div className="flex items-center gap-3">
+              <Clock className="w-4 h-4 text-[var(--accent)]" />
+              <span className="text-sm text-white">Invite Admins</span>
             </div>
-            <div>
-              <p className="font-medium text-white">Invite Admins</p>
-              <p className="text-sm text-[var(--hvo-text-muted)]">
-                Manage admin invitations
-              </p>
-            </div>
-            <TrendingUp className="h-5 w-5 text-[var(--hvo-text-muted)] ml-auto group-hover:text-[var(--hvo-magenta)] transition-colors" />
-          </a>
+            <ArrowRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors" />
+          </Link>
         </div>
       </div>
     </div>

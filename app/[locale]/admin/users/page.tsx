@@ -22,8 +22,16 @@ export default async function UsersPage({ params }: UsersPageProps) {
   const isMasterAdmin = currentProfileResult.data?.is_master_admin || false;
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">{t("title")}</h1>
+    <div className="max-w-3xl">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-white mb-1">
+          {t("title")}
+        </h1>
+        <p className="text-sm text-[var(--text-muted)]">
+          Invite and manage admin users
+        </p>
+      </div>
       <UserManagement
         invites={invitesResult.data || []}
         profiles={profilesResult.data || []}

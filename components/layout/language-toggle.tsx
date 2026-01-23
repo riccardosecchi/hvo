@@ -1,64 +1,48 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTransition } from "react";
-import { motion } from "framer-motion";
 
 export function LanguageToggle() {
   const locale = useLocale();
-  const router = useRouter();
   const pathname = usePathname();
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const toggleLocale = () => {
-    const newLocale = locale === "it" ? "en" : "it";
-    const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
-
+  const switchLocale = (newLocale: string) => {
+    if (newLocale === locale) return;
+    const newPath = pathname.replace(`/${locale}`, `/${newLocale}`);
     startTransition(() => {
-      router.replace(newPathname);
+      router.replace(newPath);
     });
   };
 
   return (
-    <button
-      onClick={toggleLocale}
-      disabled={isPending}
-      className="relative flex items-center gap-1 px-1.5 py-1.5 rounded-full bg-[var(--hvo-surface)] border border-[var(--hvo-border)] text-xs sm:text-sm font-display tracking-wider transition-all hover:border-[var(--hvo-cyan)] disabled:opacity-50 overflow-hidden min-w-[80px] sm:min-w-[90px]"
-    >
-      {/* Animated background pill */}
-      <motion.div
-        layoutId="locale-pill"
-        className="absolute h-[calc(100%-4px)] rounded-full bg-[var(--hvo-cyan)]"
-        initial={false}
-        animate={{
-          left: locale === "it" ? "2px" : "calc(50% + 1px)",
-          width: "calc(50% - 3px)",
-        }}
-        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-        style={{
-          boxShadow: "0 0 10px rgba(0, 229, 255, 0.4)",
-        }}
-      />
-
-      <span
-        className={`relative z-10 flex-1 text-center py-1 transition-colors duration-200 ${
+    <div className={`flex items-center gap-0.5 text-xs tracking-wide ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
+      <button
+        onClick={() => switchLocale("it")}
+        disabled={isPending}
+        className={`px-2 py-1.5 rounded-md transition-all duration-200 ${
           locale === "it"
-            ? "text-[var(--hvo-void)] font-semibold"
-            : "text-[var(--hvo-text-muted)]"
+            ? "text-white bg-white/5"
+            : "text-[var(--text-muted)] hover:text-white hover:bg-white/5"
         }`}
       >
         IT
-      </span>
-      <span
-        className={`relative z-10 flex-1 text-center py-1 transition-colors duration-200 ${
+      </button>
+      <span className="text-white/20 px-0.5">/</span>
+      <button
+        onClick={() => switchLocale("en")}
+        disabled={isPending}
+        className={`px-2 py-1.5 rounded-md transition-all duration-200 ${
           locale === "en"
-            ? "text-[var(--hvo-void)] font-semibold"
-            : "text-[var(--hvo-text-muted)]"
+            ? "text-white bg-white/5"
+            : "text-[var(--text-muted)] hover:text-white hover:bg-white/5"
         }`}
       >
         EN
-      </span>
-    </button>
+      </button>
+    </div>
   );
 }

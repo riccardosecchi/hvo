@@ -29,21 +29,21 @@ export function CosmicButton({
   onClick,
 }: CosmicButtonProps) {
   const baseStyles =
-    "relative inline-flex items-center justify-center gap-2 font-display tracking-[0.1em] uppercase rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden";
+    "relative inline-flex items-center justify-center gap-2 font-medium tracking-wide uppercase rounded-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden";
 
   const variants = {
     primary:
-      "bg-[var(--hvo-cyan)] text-[var(--hvo-void)] hover:shadow-[0_0_30px_rgba(0,229,255,0.4)] active:scale-[0.98]",
+      "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:shadow-[0_0_20px_var(--accent-glow)] active:scale-[0.98]",
     secondary:
-      "bg-transparent border-2 border-[var(--hvo-cyan)] text-[var(--hvo-cyan)] hover:bg-[var(--hvo-cyan)]/10 hover:shadow-[0_0_20px_rgba(0,229,255,0.2)]",
+      "bg-transparent border border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)]/10 hover:shadow-[0_0_15px_var(--accent-glow)]",
     ghost:
-      "bg-transparent text-[var(--hvo-text-secondary)] hover:text-[var(--hvo-cyan)] hover:bg-[var(--hvo-cyan)]/5",
+      "bg-transparent text-[var(--text-secondary)] hover:text-white hover:bg-white/5",
   };
 
   const sizes = {
     sm: "px-4 py-2 text-xs",
-    md: "px-6 py-3.5 text-sm",
-    lg: "px-8 py-4 text-base",
+    md: "px-5 py-3 text-sm",
+    lg: "px-6 py-3.5 text-base",
   };
 
   return (
@@ -57,7 +57,7 @@ export function CosmicButton({
     >
       {/* Shine effect */}
       {variant === "primary" && (
-        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700" />
+        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700" />
       )}
 
       {/* Content */}

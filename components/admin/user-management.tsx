@@ -4,11 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
-import { Copy, Check, UserPlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Copy, Check, UserPlus, Mail, Users, Clock, Loader2 } from "lucide-react";
 import type { AdminInvite, Profile } from "@/lib/database.types";
 
 interface UserManagementProps {
@@ -68,108 +64,132 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Invite Section */}
-      <Card className="bg-card/50 border-border/50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5 text-primary" />
-            {t("invite")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <Label htmlFor="email" className="sr-only">Email</Label>
-              <Input
-                id="email"
+      <div className="bg-[var(--surface-1)] border border-white/[0.06] rounded-lg overflow-hidden">
+        <div className="p-4 border-b border-white/[0.06] flex items-center gap-3">
+          <div className="p-2 rounded-md bg-[var(--accent)]/10">
+            <UserPlus className="w-5 h-5 text-[var(--accent)]" />
+          </div>
+          <h2 className="font-semibold text-lg text-white">{t("invite")}</h2>
+        </div>
+        <div className="p-4 space-y-4">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1 relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
+                <Mail className="w-5 h-5" />
+              </div>
+              <input
                 type="email"
                 placeholder="email@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-input border-border"
+                className="w-full h-11 pl-12 pr-4 bg-[var(--surface-2)] border border-white/[0.06] rounded-md text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
               />
             </div>
-            <Button
+            <button
               onClick={generateInviteLink}
               disabled={!email || loading}
-              className="bg-primary text-primary-foreground"
+              className="h-11 px-5 bg-[var(--accent)] text-white font-medium text-sm tracking-wide uppercase rounded-md hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {loading ? "..." : t("generateLink")}
-            </Button>
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("generateLink")}
+            </button>
           </div>
 
           {generatedLink && (
-            <div className="p-3 bg-muted/30 rounded-lg">
-              <p className="text-sm text-muted-foreground mb-2">Registration link:</p>
+            <div className="p-4 bg-[var(--surface-2)] rounded-md">
+              <p className="text-xs text-[var(--text-muted)] mb-2">Registration link:</p>
               <div className="flex gap-2">
-                <Input
+                <input
                   value={generatedLink}
                   readOnly
-                  className="bg-input border-border text-xs"
+                  className="flex-1 h-10 px-3 bg-[var(--surface-1)] border border-white/[0.06] rounded-md text-xs text-[var(--text-secondary)] focus:outline-none"
                 />
-                <Button variant="outline" size="icon" onClick={copyLink}>
-                  {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                </Button>
+                <button
+                  onClick={copyLink}
+                  className={`h-10 px-4 rounded-md border transition-colors flex items-center gap-2 ${
+                    copied
+                      ? "bg-green-500/10 border-green-500/30 text-green-400"
+                      : "bg-[var(--surface-1)] border-white/[0.06] text-[var(--text-muted)] hover:text-white"
+                  }`}
+                >
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </button>
               </div>
               {copied && (
-                <p className="text-xs text-green-500 mt-1">{t("linkCopied")}</p>
+                <p className="text-xs text-green-400 mt-2">{t("linkCopied")}</p>
               )}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Pending Invites */}
       {isMasterAdmin && pendingInvites.length > 0 && (
-        <Card className="bg-card/50 border-border/50">
-          <CardHeader>
-            <CardTitle>{t("pending")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {pendingInvites.map((invite) => (
-                <div
-                  key={invite.id}
-                  className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
-                >
-                  <span className="text-sm">{invite.email}</span>
-                  <Button
-                    size="sm"
-                    onClick={() => confirmUser(invite.id)}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    {t("confirmUser")}
-                  </Button>
-                </div>
-              ))}
+        <div className="bg-[var(--surface-1)] border border-white/[0.06] rounded-lg overflow-hidden">
+          <div className="p-4 border-b border-white/[0.06] flex items-center gap-3">
+            <div className="p-2 rounded-md bg-amber-500/10">
+              <Clock className="w-5 h-5 text-amber-400" />
             </div>
-          </CardContent>
-        </Card>
+            <h2 className="font-semibold text-lg text-white">{t("pending")}</h2>
+            <span className="ml-auto px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-xs font-medium">
+              {pendingInvites.length}
+            </span>
+          </div>
+          <div className="divide-y divide-white/[0.06]">
+            {pendingInvites.map((invite) => (
+              <div
+                key={invite.id}
+                className="flex items-center justify-between p-4"
+              >
+                <span className="text-sm text-white">{invite.email}</span>
+                <button
+                  onClick={() => confirmUser(invite.id)}
+                  className="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600 transition-colors"
+                >
+                  {t("confirmUser")}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Confirmed Admins */}
-      <Card className="bg-card/50 border-border/50">
-        <CardHeader>
-          <CardTitle>{t("confirmed")}</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="bg-[var(--surface-1)] border border-white/[0.06] rounded-lg overflow-hidden">
+        <div className="p-4 border-b border-white/[0.06] flex items-center gap-3">
+          <div className="p-2 rounded-md bg-green-500/10">
+            <Users className="w-5 h-5 text-green-400" />
+          </div>
+          <h2 className="font-semibold text-lg text-white">{t("confirmed")}</h2>
+          <span className="ml-auto px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 text-xs font-medium">
+            {confirmedProfiles.length}
+          </span>
+        </div>
+        <div className="p-4">
           {confirmedProfiles.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No other admins yet</p>
+            <p className="text-sm text-[var(--text-muted)] text-center py-4">
+              No other admins yet
+            </p>
           ) : (
             <div className="space-y-2">
               {confirmedProfiles.map((profile) => (
                 <div
                   key={profile.id}
-                  className="p-3 bg-muted/30 rounded-lg"
+                  className="flex items-center gap-3 p-3 bg-[var(--surface-2)] rounded-md"
                 >
-                  <span className="text-sm">{profile.email}</span>
+                  <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <span className="text-green-400 text-sm font-medium">
+                      {profile.email.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <span className="text-sm text-white">{profile.email}</span>
                 </div>
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

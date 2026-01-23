@@ -1,10 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { LanguageToggle } from "./language-toggle";
-import { Shield } from "lucide-react";
+import { useState } from "react";
 
 interface HeaderProps {
   locale: string;
@@ -12,80 +11,61 @@ interface HeaderProps {
 
 export function Header({ locale }: HeaderProps) {
   const { scrollY } = useScroll();
+  const [scrolled, setScrolled] = useState(false);
 
-  // Header becomes more visible as you scroll
-  const headerBg = useTransform(
-    scrollY,
-    [0, 100],
-    ["rgba(5, 8, 16, 0)", "rgba(5, 8, 16, 0.85)"]
-  );
-
-  const headerBorder = useTransform(
-    scrollY,
-    [0, 100],
-    ["rgba(0, 229, 255, 0)", "rgba(0, 229, 255, 0.1)"]
-  );
-
-  const headerBlur = useTransform(scrollY, [0, 100], ["blur(0px)", "blur(20px)"]);
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setScrolled(latest > 50);
+  });
 
   return (
     <motion.header
-      style={{
-        backgroundColor: headerBg,
-        borderColor: headerBorder,
-        backdropFilter: headerBlur,
-        WebkitBackdropFilter: headerBlur,
-      }}
-      className="fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300"
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
+          ? "bg-black/95 backdrop-blur-md border-b border-white/[0.06]"
+          : "bg-transparent"
+        }`}
     >
-      <div className="container mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-3">
-        {/* Logo */}
-        <Link
-          href={`/${locale}`}
-          className="relative group flex items-center gap-2 sm:gap-3"
-        >
-          {/* Logo glow on hover */}
-          <motion.div
-            className="absolute -inset-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-            style={{
-              background: "radial-gradient(circle, rgba(0, 229, 255, 0.15) 0%, transparent 70%)",
-              filter: "blur(10px)",
-            }}
-          />
-
-          <Image
-            src="/logos/04_HVO.jpg"
-            alt="HVO"
-            width={48}
-            height={48}
-            className="relative h-10 w-10 sm:h-12 sm:w-12 object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
-            style={{
-              boxShadow: "0 0 20px rgba(0, 229, 255, 0.2)",
-            }}
-            priority
-          />
-
-          <span className="relative font-display text-lg sm:text-xl tracking-[0.15em] text-white/90 hidden xs:block">
-            HVO
-          </span>
-        </Link>
-
-        {/* Navigation */}
-        <nav className="flex items-center gap-2 sm:gap-4">
-          {/* Admin Link - Visible on all screens */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 sm:h-18">
+          {/* Stylized Logo */}
           <Link
-            href={`/${locale}/admin/login`}
-            className="relative group flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-[var(--hvo-surface)]/50 border border-[var(--hvo-border)] hover:border-[var(--hvo-cyan)]/50 transition-all duration-300"
+            href={`/${locale}`}
+            className="flex items-center group"
           >
-            <Shield className="h-4 w-4 text-[var(--hvo-cyan)] group-hover:drop-shadow-[0_0_8px_rgba(0,229,255,0.6)]" />
-            <span className="text-xs sm:text-sm font-medium tracking-wider uppercase text-[var(--hvo-text-secondary)] group-hover:text-[var(--hvo-cyan)] transition-colors duration-300 hidden sm:inline">
-              Admin
+            <span
+              className="text-xl sm:text-2xl font-black tracking-[0.1em] transition-all duration-300"
+              style={{
+                background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, #00E5FF 40%, #E91E8C 70%, rgba(255,255,255,0.9) 100%)",
+                backgroundSize: "200% 200%",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                animation: "gradient-shift 8s ease infinite",
+              }}
+            >
+              HVO
             </span>
           </Link>
 
-          {/* Language Toggle */}
-          <LanguageToggle />
-        </nav>
+          {/* Navigation */}
+          <nav className="flex items-center gap-4 sm:gap-6">
+            {/* Admin Link */}
+            <Link
+              href={`/${locale}/admin/login`}
+              className="text-xs sm:text-sm text-[var(--text-muted)] hover:text-white transition-colors duration-200 tracking-wide"
+            >
+              Admin
+            </Link>
+
+            {/* Divider */}
+            <div className="h-4 w-px bg-white/10" />
+
+            {/* Language Toggle */}
+            <LanguageToggle />
+          </nav>
+        </div>
       </div>
     </motion.header>
   );

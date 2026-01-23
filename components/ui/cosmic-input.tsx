@@ -20,17 +20,17 @@ const CosmicInput = React.forwardRef<HTMLInputElement, CosmicInputProps>(
     return (
       <div className="space-y-2">
         {label && (
-          <label className="block text-sm font-medium text-[var(--hvo-text-secondary)] mb-2">
+          <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
             {label}
           </label>
         )}
         <div className="relative group">
           {/* Glow effect on focus */}
-          <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-[var(--hvo-cyan)]/0 via-[var(--hvo-cyan)]/0 to-[var(--hvo-magenta)]/0 opacity-0 group-focus-within:opacity-100 group-focus-within:from-[var(--hvo-cyan)]/20 group-focus-within:to-[var(--hvo-magenta)]/20 blur transition-all duration-300" />
+          <div className="absolute -inset-0.5 rounded-md bg-gradient-to-r from-[var(--accent)]/0 to-[var(--accent)]/0 opacity-0 group-focus-within:opacity-100 group-focus-within:from-[var(--accent)]/10 group-focus-within:to-[var(--accent)]/10 blur transition-all duration-300" />
 
           {/* Icon */}
           {icon && (
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--hvo-text-muted)] group-focus-within:text-[var(--hvo-cyan)] transition-colors z-10">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--accent)] transition-colors z-10">
               {icon}
             </div>
           )}
@@ -39,15 +39,15 @@ const CosmicInput = React.forwardRef<HTMLInputElement, CosmicInputProps>(
           <input
             type={inputType}
             className={cn(
-              "relative w-full px-4 py-4 rounded-xl",
-              "bg-[var(--hvo-deep)] border-2 border-[var(--hvo-border)]",
-              "text-white text-base placeholder:text-[var(--hvo-text-muted)]",
-              "focus:outline-none focus:border-[var(--hvo-cyan)]/50",
+              "relative w-full px-4 py-3.5 rounded-md",
+              "bg-[var(--surface-1)] border border-white/[0.08]",
+              "text-white text-base placeholder:text-[var(--text-muted)]",
+              "focus:outline-none focus:border-[var(--accent)]/50",
               "transition-all duration-300",
               "disabled:opacity-50 disabled:cursor-not-allowed",
               icon && "pl-12",
               isPassword && "pr-12",
-              error && "border-[var(--hvo-magenta)]/50",
+              error && "border-red-500/50",
               className
             )}
             ref={ref}
@@ -59,7 +59,7 @@ const CosmicInput = React.forwardRef<HTMLInputElement, CosmicInputProps>(
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-[var(--hvo-text-muted)] hover:text-[var(--hvo-cyan)] transition-colors z-10"
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors z-10"
               tabIndex={-1}
             >
               {showPassword ? (
@@ -73,7 +73,7 @@ const CosmicInput = React.forwardRef<HTMLInputElement, CosmicInputProps>(
 
         {/* Error message */}
         {error && (
-          <p className="text-sm text-[var(--hvo-magenta)] mt-1">{error}</p>
+          <p className="text-sm text-red-400 mt-1">{error}</p>
         )}
       </div>
     );

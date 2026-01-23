@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Plus, Calendar, Loader2 } from "lucide-react";
 import { EventsTable } from "@/components/admin/events-table";
 import { EventForm } from "@/components/admin/event-form";
 import type { Event } from "@/lib/database.types";
@@ -48,24 +47,45 @@ export default function EventsPage({ params }: EventsPageProps) {
     setShowForm(false);
   };
 
-  if (loading) {
-    return <div className="text-muted-foreground">Loading...</div>;
-  }
-
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">{t("title")}</h1>
-        <Button
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-semibold text-white mb-1">
+            {t("title")}
+          </h1>
+          <p className="text-sm text-[var(--text-muted)]">
+            Create and manage your events
+          </p>
+        </div>
+        <button
           onClick={() => setShowForm(true)}
-          className="bg-primary text-primary-foreground"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] text-white font-medium text-sm tracking-wide uppercase rounded-md hover:bg-[var(--accent-hover)] transition-colors"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="w-4 h-4" />
           {t("new")}
-        </Button>
+        </button>
       </div>
 
-      <EventsTable events={events} locale={locale} onEdit={handleEdit} />
+      {/* Content */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-6 h-6 text-[var(--accent)] animate-spin" />
+        </div>
+      ) : events.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center border border-white/[0.06] rounded-lg bg-[var(--surface-1)]">
+          <div className="w-16 h-16 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center mb-4">
+            <Calendar className="w-8 h-8 text-[var(--accent)]" />
+          </div>
+          <h3 className="text-lg font-semibold text-white mb-2">No events yet</h3>
+          <p className="text-sm text-[var(--text-muted)] max-w-xs">
+            Create your first event to get started. Events will appear on your public homepage.
+          </p>
+        </div>
+      ) : (
+        <EventsTable events={events} locale={locale} onEdit={handleEdit} />
+      )}
 
       <EventForm
         event={editEvent}

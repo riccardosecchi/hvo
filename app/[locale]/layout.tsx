@@ -3,8 +3,8 @@ import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { Header, Footer } from "@/components/layout";
-import { ParticleBackground } from "@/components/effects";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 export async function generateMetadata({
   params,
@@ -58,21 +58,21 @@ export default async function LocaleLayout({
 
   const messages = await getMessages();
 
+  // Check if we're on an admin route - hide header/footer for admin pages
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || headersList.get("x-invoke-path") || "";
+  const isAdminRoute = pathname.includes("/admin");
+
   return (
     <html lang={locale} className="dark">
-      <body className="min-h-screen flex flex-col overflow-x-hidden">
+      <body className="min-h-screen bg-black">
         <NextIntlClientProvider messages={messages}>
-          {/* Background Effects */}
-          <div className="mesh-gradient" />
-          <ParticleBackground />
-          <div className="noise-overlay" />
-
-          {/* Content */}
-          <Header locale={locale} />
-          <main className="flex-1 relative z-10">{children}</main>
-          <Footer />
+          {!isAdminRoute && <Header locale={locale} />}
+          <main className="relative">{children}</main>
+          {!isAdminRoute && <Footer />}
         </NextIntlClientProvider>
       </body>
     </html>
   );
 }
+

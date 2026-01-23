@@ -79,16 +79,16 @@ export function ProfileForm({ email }: ProfileFormProps) {
         animate={{ opacity: 1, y: 0 }}
         className="relative rounded-2xl overflow-hidden"
       >
-        <div className="absolute inset-0 rounded-2xl p-[1px] bg-gradient-to-br from-[var(--hvo-cyan)]/20 to-transparent">
-          <div className="absolute inset-[1px] rounded-2xl bg-[var(--hvo-surface)]" />
+        <div className="absolute inset-0 rounded-2xl p-[1px] bg-gradient-to-br from-[var(--accent)]/20 to-transparent">
+          <div className="absolute inset-[1px] rounded-2xl bg-[var(--surface-1)]" />
         </div>
         <div className="relative p-6">
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-[var(--hvo-cyan)]/10">
-              <Mail className="h-5 w-5 text-[var(--hvo-cyan)]" />
+            <div className="p-3 rounded-xl bg-[var(--accent)]/10">
+              <Mail className="h-5 w-5 text-[var(--accent)]" />
             </div>
             <div>
-              <p className="text-sm text-[var(--hvo-text-muted)] mb-1">Email Address</p>
+              <p className="text-sm text-[var(--text-muted)] mb-1">Email Address</p>
               <p className="text-white font-medium">{email}</p>
             </div>
           </div>
@@ -102,13 +102,13 @@ export function ProfileForm({ email }: ProfileFormProps) {
         transition={{ delay: 0.1 }}
         className="relative rounded-2xl overflow-hidden"
       >
-        <div className="absolute inset-0 rounded-2xl p-[1px] bg-gradient-to-br from-[var(--hvo-magenta)]/20 via-transparent to-[var(--hvo-cyan)]/20">
-          <div className="absolute inset-[1px] rounded-2xl bg-[var(--hvo-surface)]" />
+        <div className="absolute inset-0 rounded-2xl p-[1px] bg-gradient-to-br from-[var(--accent)]/20 via-transparent to-[var(--accent)]/20">
+          <div className="absolute inset-[1px] rounded-2xl bg-[var(--surface-1)]" />
         </div>
         <div className="relative p-6 sm:p-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 rounded-xl bg-[var(--hvo-magenta)]/10">
-              <Key className="h-5 w-5 text-[var(--hvo-magenta)]" />
+            <div className="p-3 rounded-xl bg-[var(--accent)]/10">
+              <Key className="h-5 w-5 text-[var(--accent)]" />
             </div>
             <h2 className="text-lg font-display tracking-wide text-white">
               {t("changePassword")}
@@ -154,10 +154,10 @@ export function ProfileForm({ email }: ProfileFormProps) {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-3 p-4 rounded-xl bg-[var(--hvo-magenta)]/10 border border-[var(--hvo-magenta)]/30"
+                className="flex items-center gap-3 p-4 rounded-xl bg-[var(--accent)]/10 border border-[var(--accent)]/30"
               >
-                <AlertCircle className="h-5 w-5 text-[var(--hvo-magenta)] shrink-0" />
-                <p className="text-sm text-[var(--hvo-magenta)]">{error}</p>
+                <AlertCircle className="h-5 w-5 text-[var(--accent)] shrink-0" />
+                <p className="text-sm text-[var(--accent)]">{error}</p>
               </motion.div>
             )}
 

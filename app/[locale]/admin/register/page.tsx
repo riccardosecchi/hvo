@@ -7,9 +7,5 @@ interface RegisterPageProps {
 export default async function RegisterPage({ params }: RegisterPageProps) {
   const { locale } = await params;
 
-  return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4">
-      <RegisterForm locale={locale} />
-    </div>
-  );
+  return <RegisterForm locale={locale} />;
 }

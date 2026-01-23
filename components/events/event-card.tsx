@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import Image from "next/image";
-import { MapPin, Calendar, Clock, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, MapPin, Calendar } from "lucide-react";
 import type { Event } from "@/lib/database.types";
 
 interface EventCardProps {
@@ -18,124 +18,112 @@ export function EventCard({ event, index }: EventCardProps) {
   const formattedDate = new Date(event.date).toLocaleDateString(
     locale === "it" ? "it-IT" : "en-US",
     {
-      weekday: "long",
+      weekday: "short",
       day: "numeric",
-      month: "long",
+      month: "short",
+      year: "numeric",
     }
   );
 
-  const formattedTime = event.time.slice(0, 5);
+  const formattedTime = event.time?.slice(0, 5) || "";
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{
         duration: 0.7,
         delay: index * 0.15,
-        ease: [0.16, 1, 0.3, 1],
+        ease: [0.22, 1, 0.36, 1],
       }}
       className="group relative"
     >
       {/* Card Container */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--hvo-surface)] to-[var(--hvo-deep)] border border-[var(--hvo-border)] transition-all duration-500 hover:border-[var(--hvo-cyan)]/30">
-        {/* Gradient overlay on hover */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-br from-[var(--hvo-cyan)]/5 to-[var(--hvo-magenta)]/5" />
+      <div className="relative overflow-hidden rounded-lg border border-white/[0.06] bg-[#080808] transition-all duration-500 hover:border-white/[0.12] hover:bg-[#0a0a0a]">
+        {/* Image Section - 16:9 Aspect Ratio */}
+        <div className="relative aspect-[16/9] overflow-hidden">
+          {event.image_url ? (
+            <>
+              <Image
+                src={event.image_url}
+                alt={event.name}
+                fill
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1200px"
+                priority={index < 2}
+              />
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-[#111] to-[#080808]">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-6xl font-bold text-white/5 tracking-wider">HVO</span>
+              </div>
+            </div>
+          )}
+
+          {/* Date Badge - Top Right */}
+          <div className="absolute top-4 right-4 px-3 py-1.5 rounded-md bg-black/60 backdrop-blur-sm border border-white/10">
+            <span className="text-xs font-medium text-white tabular-nums">
+              {formattedDate}
+            </span>
+          </div>
         </div>
 
-        {/* Glow effect on hover */}
-        <div
-          className="absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-          style={{
-            background: "linear-gradient(135deg, rgba(0, 229, 255, 0.1), transparent, rgba(233, 30, 140, 0.1))",
-            filter: "blur(20px)",
-          }}
-        />
-
-        <div className="relative flex flex-col md:flex-row">
-          {/* Image Section */}
-          <div className="relative w-full md:w-2/5 aspect-[4/3] md:aspect-auto overflow-hidden">
-            {event.image_url ? (
-              <>
-                <Image
-                  src={event.image_url}
-                  alt={event.name}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  sizes="(max-width: 768px) 100vw, 40vw"
-                />
-                {/* Image overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[var(--hvo-surface)] md:block hidden" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[var(--hvo-surface)] to-transparent md:hidden" />
-              </>
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-[var(--hvo-cyan)]/20 via-[var(--hvo-violet)]/10 to-[var(--hvo-magenta)]/20" />
-            )}
-
-            {/* Date badge */}
-            <div className="absolute top-4 left-4 px-4 py-2 rounded-lg bg-[var(--hvo-void)]/80 backdrop-blur-md border border-[var(--hvo-border)]">
-              <p className="font-display text-xs tracking-[0.2em] uppercase text-[var(--hvo-cyan)]">
-                {new Date(event.date).toLocaleDateString(locale === "it" ? "it-IT" : "en-US", {
-                  day: "numeric",
-                  month: "short",
-                })}
-              </p>
+        {/* Content Section */}
+        <div className="p-5 sm:p-6">
+          {/* Top Row - Location & Time */}
+          <div className="flex items-center gap-4 text-[var(--text-muted)] text-xs mb-3">
+            <div className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5" />
+              <span className="uppercase tracking-wider">{event.location}</span>
             </div>
+            {formattedTime && (
+              <>
+                <div className="w-px h-3 bg-white/10" />
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span className="tabular-nums">{formattedTime}</span>
+                </div>
+              </>
+            )}
           </div>
 
-          {/* Content Section */}
-          <div className="relative flex-1 p-6 md:p-8 flex flex-col justify-center">
-            {/* Event Name */}
-            <h3 className="text-2xl md:text-3xl lg:text-4xl font-display tracking-wide text-white mb-4 group-hover:text-[var(--hvo-cyan)] transition-colors duration-300">
-              {event.name}
-            </h3>
+          {/* Event Title */}
+          <h3 className="text-xl sm:text-2xl font-semibold text-white mb-4 leading-tight group-hover:text-[var(--accent)] transition-colors duration-300">
+            {event.name}
+          </h3>
 
-            {/* Event Details */}
-            <div className="flex flex-wrap gap-4 md:gap-6 mb-6">
-              <div className="flex items-center gap-2 text-[var(--hvo-text-secondary)]">
-                <div className="p-2 rounded-lg bg-[var(--hvo-cyan)]/10 text-[var(--hvo-cyan)]">
-                  <MapPin className="h-4 w-4" />
-                </div>
-                <span className="text-sm">{event.location}</span>
-              </div>
-
-              <div className="flex items-center gap-2 text-[var(--hvo-text-secondary)]">
-                <div className="p-2 rounded-lg bg-[var(--hvo-magenta)]/10 text-[var(--hvo-magenta)]">
-                  <Calendar className="h-4 w-4" />
-                </div>
-                <span className="text-sm capitalize">{formattedDate}</span>
-              </div>
-
-              <div className="flex items-center gap-2 text-[var(--hvo-text-secondary)]">
-                <div className="p-2 rounded-lg bg-[var(--hvo-violet)]/10 text-[var(--hvo-violet)]">
-                  <Clock className="h-4 w-4" />
-                </div>
-                <span className="text-sm">{formattedTime}</span>
-              </div>
+          {/* Action Row */}
+          <div className="flex items-center justify-between pt-4 border-t border-white/[0.06]">
+            {/* Status Indicator */}
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${event.is_booking_open ? 'bg-[#22C55E]' : 'bg-[var(--text-muted)]'}`} />
+              <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">
+                {event.is_booking_open ? (locale === "it" ? "Prenotazioni Aperte" : "Booking Open") : (locale === "it" ? "Coming Soon" : "Coming Soon")}
+              </span>
             </div>
 
-            {/* CTA Button */}
+            {/* CTA Button - Only shows when booking is open */}
             {event.is_booking_open && event.booking_link && (
-              <motion.a
+              <a
                 href={event.booking_link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 w-fit px-6 py-3 rounded-xl font-display text-sm tracking-[0.1em] uppercase bg-[var(--hvo-cyan)] text-[var(--hvo-void)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,229,255,0.4)] hover:scale-105"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-black bg-[var(--accent)] rounded-md transition-all duration-300 hover:bg-[var(--accent-hover)] hover:shadow-[0_0_20px_var(--accent-glow)]"
               >
-                {t("book")}
-                <ArrowUpRight className="h-4 w-4" />
-              </motion.a>
+                {locale === "it" ? "Prenotati" : "Book Now"}
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </a>
             )}
-
-            {/* Decorative line */}
-            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[var(--hvo-cyan)]/0 via-[var(--hvo-cyan)]/30 to-[var(--hvo-magenta)]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           </div>
         </div>
       </div>
+
+      {/* Hover Glow Effect */}
+      <div className="absolute -inset-px rounded-lg bg-gradient-to-r from-[var(--accent)]/0 via-[var(--accent)]/0 to-[var(--accent)]/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-hover:from-[var(--accent)]/5 group-hover:via-transparent group-hover:to-[var(--accent)]/5 pointer-events-none" />
     </motion.article>
   );
 }

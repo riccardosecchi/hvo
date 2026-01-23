@@ -19,6 +19,7 @@ export interface Database {
           location: string;
           image_url: string | null;
           booking_link: string | null;
+          booking_type: "external" | "internal";
           is_active: boolean;
           is_booking_open: boolean;
         };
@@ -31,6 +32,7 @@ export interface Database {
           location: string;
           image_url?: string | null;
           booking_link?: string | null;
+          booking_type?: "external" | "internal";
           is_active?: boolean;
           is_booking_open?: boolean;
         };
@@ -43,8 +45,76 @@ export interface Database {
           location?: string;
           image_url?: string | null;
           booking_link?: string | null;
+          booking_type?: "external" | "internal";
           is_active?: boolean;
           is_booking_open?: boolean;
+        };
+      };
+      event_booking_fields: {
+        Row: {
+          id: string;
+          event_id: string;
+          field_name: string;
+          field_label: string;
+          field_type: "text" | "email" | "tel" | "number" | "textarea" | "select";
+          field_options: string[];
+          is_required: boolean;
+          field_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_id: string;
+          field_name: string;
+          field_label: string;
+          field_type?: "text" | "email" | "tel" | "number" | "textarea" | "select";
+          field_options?: string[];
+          is_required?: boolean;
+          field_order?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_id?: string;
+          field_name?: string;
+          field_label?: string;
+          field_type?: "text" | "email" | "tel" | "number" | "textarea" | "select";
+          field_options?: string[];
+          is_required?: boolean;
+          field_order?: number;
+          created_at?: string;
+        };
+      };
+      event_bookings: {
+        Row: {
+          id: string;
+          event_id: string;
+          booking_data: Record<string, string>;
+          status: "pending" | "approved" | "rejected";
+          notes: string | null;
+          created_at: string;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          event_id: string;
+          booking_data: Record<string, string>;
+          status?: "pending" | "approved" | "rejected";
+          notes?: string | null;
+          created_at?: string;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          event_id?: string;
+          booking_data?: Record<string, string>;
+          status?: "pending" | "approved" | "rejected";
+          notes?: string | null;
+          created_at?: string;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
         };
       };
       profiles: {
@@ -98,5 +168,18 @@ export interface Database {
 }
 
 export type Event = Database["public"]["Tables"]["events"]["Row"];
+export type EventBookingField = Database["public"]["Tables"]["event_booking_fields"]["Row"];
+export type EventBooking = Database["public"]["Tables"]["event_bookings"]["Row"];
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type AdminInvite = Database["public"]["Tables"]["admin_invites"]["Row"];
+
+// Helper types for form building
+export type BookingFieldType = EventBookingField["field_type"];
+
+export interface BookingFieldConfig {
+  field_name: string;
+  field_label: string;
+  field_type: BookingFieldType;
+  field_options?: string[];
+  is_required: boolean;
+}

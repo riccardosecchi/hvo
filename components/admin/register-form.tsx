@@ -90,7 +90,7 @@ export function RegisterForm({ locale }: RegisterFormProps) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="flex items-center gap-3 text-[var(--hvo-text-muted)]"
+          className="flex items-center gap-3 text-[var(--text-muted)]"
         >
           <Loader2 className="h-5 w-5 animate-spin" />
           <span>Verifying invitation...</span>
@@ -108,17 +108,17 @@ export function RegisterForm({ locale }: RegisterFormProps) {
           className="relative w-full max-w-md"
         >
           <div className="relative rounded-3xl overflow-hidden">
-            <div className="absolute inset-0 rounded-3xl p-[1px] bg-gradient-to-br from-[var(--hvo-magenta)]/30 via-transparent to-[var(--hvo-magenta)]/30">
-              <div className="absolute inset-[1px] rounded-3xl bg-[var(--hvo-surface)]" />
+            <div className="absolute inset-0 rounded-3xl p-[1px] bg-gradient-to-br from-[red-500]/30 via-transparent to-[red-500]/30">
+              <div className="absolute inset-[1px] rounded-3xl bg-[var(--surface-1)]" />
             </div>
             <div className="relative p-8 sm:p-10 text-center">
-              <div className="inline-flex p-4 rounded-2xl bg-[var(--hvo-magenta)]/10 mb-6">
-                <ShieldX className="h-10 w-10 text-[var(--hvo-magenta)]" />
+              <div className="inline-flex p-4 rounded-2xl bg-[red-500]/10 mb-6">
+                <ShieldX className="h-10 w-10 text-[red-500]" />
               </div>
               <h2 className="text-xl font-display text-white mb-2">
                 Invalid Invitation
               </h2>
-              <p className="text-[var(--hvo-text-muted)] text-sm">
+              <p className="text-[var(--text-muted)] text-sm">
                 This invitation link is invalid or has expired. Please contact your administrator for a new invitation.
               </p>
             </div>
@@ -132,8 +132,8 @@ export function RegisterForm({ locale }: RegisterFormProps) {
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6">
       {/* Background effects */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--hvo-cyan)]/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--hvo-magenta)]/10 rounded-full blur-[120px]" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--accent)]/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[red-500]/10 rounded-full blur-[120px]" />
       </div>
 
       <motion.div
@@ -145,8 +145,8 @@ export function RegisterForm({ locale }: RegisterFormProps) {
         {/* Card */}
         <div className="relative rounded-3xl overflow-hidden">
           {/* Gradient border */}
-          <div className="absolute inset-0 rounded-3xl p-[1px] bg-gradient-to-br from-[var(--hvo-cyan)]/30 via-transparent to-[var(--hvo-magenta)]/30">
-            <div className="absolute inset-[1px] rounded-3xl bg-[var(--hvo-surface)]" />
+          <div className="absolute inset-0 rounded-3xl p-[1px] bg-gradient-to-br from-[var(--accent)]/30 via-transparent to-[red-500]/30">
+            <div className="absolute inset-[1px] rounded-3xl bg-[var(--surface-1)]" />
           </div>
 
           {/* Content */}
@@ -159,7 +159,7 @@ export function RegisterForm({ locale }: RegisterFormProps) {
               className="flex justify-center mb-8"
             >
               <div className="relative">
-                <div className="absolute inset-0 rounded-2xl bg-[var(--hvo-cyan)]/20 blur-xl" />
+                <div className="absolute inset-0 rounded-2xl bg-[var(--accent)]/20 blur-xl" />
                 <Image
                   src="/logos/04_HVO.jpg"
                   alt="HVO"
@@ -184,7 +184,7 @@ export function RegisterForm({ locale }: RegisterFormProps) {
               <h1 className="text-2xl sm:text-3xl font-display tracking-wide text-white mb-2">
                 Create Account
               </h1>
-              <p className="text-sm text-[var(--hvo-text-muted)]">
+              <p className="text-sm text-[var(--text-muted)]">
                 Complete your admin registration
               </p>
             </motion.div>
@@ -232,10 +232,10 @@ export function RegisterForm({ locale }: RegisterFormProps) {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-3 p-4 rounded-xl bg-[var(--hvo-magenta)]/10 border border-[var(--hvo-magenta)]/30"
+                  className="flex items-center gap-3 p-4 rounded-xl bg-[red-500]/10 border border-[red-500]/30"
                 >
-                  <AlertCircle className="h-5 w-5 text-[var(--hvo-magenta)] shrink-0" />
-                  <p className="text-sm text-[var(--hvo-magenta)]">{error}</p>
+                  <AlertCircle className="h-5 w-5 text-[red-500] shrink-0" />
+                  <p className="text-sm text-[red-500]">{error}</p>
                 </motion.div>
               )}
 

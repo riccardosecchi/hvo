@@ -8,8 +8,16 @@ export default async function ProfilePage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">{t("title")}</h1>
+    <div className="max-w-2xl">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-white mb-1">
+          {t("title")}
+        </h1>
+        <p className="text-sm text-[var(--text-muted)]">
+          Manage your account settings
+        </p>
+      </div>
       <ProfileForm email={user?.email || ""} />
     </div>
   );
