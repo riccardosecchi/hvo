@@ -27,13 +27,13 @@ export function Hero() {
   return (
     <section
       ref={containerRef}
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4"
     >
       {/* Animated gradient orbs */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Cyan orb */}
         <motion.div
-          className="absolute w-[600px] h-[600px] rounded-full"
+          className="absolute w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] rounded-full"
           style={{
             background: "radial-gradient(circle, rgba(0, 229, 255, 0.15) 0%, transparent 70%)",
             top: "10%",
@@ -54,7 +54,7 @@ export function Hero() {
 
         {/* Magenta orb */}
         <motion.div
-          className="absolute w-[500px] h-[500px] rounded-full"
+          className="absolute w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] rounded-full"
           style={{
             background: "radial-gradient(circle, rgba(233, 30, 140, 0.12) 0%, transparent 70%)",
             bottom: "20%",
@@ -75,7 +75,7 @@ export function Hero() {
 
         {/* Violet orb */}
         <motion.div
-          className="absolute w-[400px] h-[400px] rounded-full"
+          className="absolute w-[300px] sm:w-[400px] h-[300px] sm:h-[400px] rounded-full"
           style={{
             background: "radial-gradient(circle, rgba(123, 47, 187, 0.1) 0%, transparent 70%)",
             top: "50%",
@@ -118,43 +118,55 @@ export function Hero() {
           }}
         />
 
-        {/* Logo */}
+        {/* Logo - seamlessly blended */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="relative"
         >
+          {/* Multiple glow layers for depth */}
+          <div className="absolute inset-0 rounded-2xl" style={{
+            background: "radial-gradient(circle at 30% 30%, rgba(0, 229, 255, 0.3), transparent 60%)",
+            filter: "blur(40px)",
+          }} />
+          <div className="absolute inset-0 rounded-2xl" style={{
+            background: "radial-gradient(circle at 70% 70%, rgba(233, 30, 140, 0.2), transparent 60%)",
+            filter: "blur(40px)",
+          }} />
+
           <Image
             src="/logos/04_HVO.jpg"
             alt="HVO"
             width={400}
             height={400}
-            className="w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 object-cover rounded-2xl shadow-2xl"
+            className="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 object-cover rounded-2xl"
             style={{
-              boxShadow: "0 0 60px rgba(0, 229, 255, 0.3), 0 0 120px rgba(233, 30, 140, 0.15)",
+              boxShadow: "0 0 80px rgba(0, 229, 255, 0.4), 0 0 160px rgba(233, 30, 140, 0.2)",
+              mixBlendMode: "screen",
+              opacity: 0.95,
             }}
             priority
           />
 
           {/* Decorative corner accents */}
-          <div className="absolute -top-2 -left-2 w-8 h-8 border-t-2 border-l-2 border-[var(--hvo-cyan)] opacity-60" />
-          <div className="absolute -top-2 -right-2 w-8 h-8 border-t-2 border-r-2 border-[var(--hvo-cyan)] opacity-60" />
-          <div className="absolute -bottom-2 -left-2 w-8 h-8 border-b-2 border-l-2 border-[var(--hvo-magenta)] opacity-60" />
-          <div className="absolute -bottom-2 -right-2 w-8 h-8 border-b-2 border-r-2 border-[var(--hvo-magenta)] opacity-60" />
+          <div className="absolute -top-2 -left-2 w-6 h-6 sm:w-8 sm:h-8 border-t-2 border-l-2 border-[var(--hvo-cyan)] opacity-60" />
+          <div className="absolute -top-2 -right-2 w-6 h-6 sm:w-8 sm:h-8 border-t-2 border-r-2 border-[var(--hvo-cyan)] opacity-60" />
+          <div className="absolute -bottom-2 -left-2 w-6 h-6 sm:w-8 sm:h-8 border-b-2 border-l-2 border-[var(--hvo-magenta)] opacity-60" />
+          <div className="absolute -bottom-2 -right-2 w-6 h-6 sm:w-8 sm:h-8 border-b-2 border-r-2 border-[var(--hvo-magenta)] opacity-60" />
         </motion.div>
       </motion.div>
 
       {/* Tagline */}
       <motion.div
         style={{ y: textY }}
-        className="relative z-10 mt-12"
+        className="relative z-10 mt-8 sm:mt-12"
       >
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="text-2xl md:text-3xl lg:text-4xl font-display tracking-[0.2em] text-[var(--hvo-text-secondary)] uppercase"
+          className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display tracking-[0.2em] text-[var(--hvo-text-secondary)] uppercase text-center"
         >
           {t("tagline")}
         </motion.p>
@@ -164,10 +176,11 @@ export function Hero() {
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ duration: 0.8, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="h-[2px] mt-4 mx-auto"
+          className="h-[2px] mt-3 sm:mt-4 mx-auto"
           style={{
             background: "linear-gradient(90deg, transparent, var(--hvo-cyan), var(--hvo-magenta), transparent)",
-            width: "200px",
+            width: "150px",
+            maxWidth: "80vw",
           }}
         />
       </motion.div>
@@ -177,7 +190,7 @@ export function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
-        className="relative z-10 mt-8 flex flex-wrap justify-center gap-3"
+        className="relative z-10 mt-6 sm:mt-8 flex flex-wrap justify-center gap-2 sm:gap-3 max-w-[90vw] sm:max-w-xl"
       >
         {["Tech House", "House", "Latin House", "Techno"].map((genre, i) => (
           <motion.span
@@ -185,7 +198,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.2 + i * 0.1 }}
-            className="px-4 py-1.5 text-sm font-medium tracking-wider uppercase rounded-full border border-[var(--hvo-border)] text-[var(--hvo-text-muted)] hover:border-[var(--hvo-cyan)] hover:text-[var(--hvo-cyan)] transition-colors duration-300 cursor-default"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium tracking-wider uppercase rounded-full border border-[var(--hvo-border)] text-[var(--hvo-text-muted)] hover:border-[var(--hvo-cyan)] hover:text-[var(--hvo-cyan)] transition-colors duration-300 cursor-default whitespace-nowrap"
           >
             {genre}
           </motion.span>
@@ -208,7 +221,7 @@ export function Hero() {
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
         >
-          <ChevronDown className="h-6 w-6" />
+          <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6" />
         </motion.div>
       </motion.button>
 

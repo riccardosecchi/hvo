@@ -24,15 +24,16 @@ export function LanguageToggle() {
     <button
       onClick={toggleLocale}
       disabled={isPending}
-      className="relative flex items-center gap-0.5 px-1 py-1 rounded-full bg-[var(--hvo-surface)] border border-[var(--hvo-border)] text-sm font-display tracking-wider transition-all hover:border-[var(--hvo-cyan)] disabled:opacity-50 overflow-hidden"
+      className="relative flex items-center gap-1 px-1.5 py-1.5 rounded-full bg-[var(--hvo-surface)] border border-[var(--hvo-border)] text-xs sm:text-sm font-display tracking-wider transition-all hover:border-[var(--hvo-cyan)] disabled:opacity-50 overflow-hidden min-w-[80px] sm:min-w-[90px]"
     >
       {/* Animated background pill */}
       <motion.div
         layoutId="locale-pill"
-        className="absolute h-[calc(100%-4px)] w-[calc(50%-2px)] rounded-full bg-[var(--hvo-cyan)]"
+        className="absolute h-[calc(100%-4px)] rounded-full bg-[var(--hvo-cyan)]"
         initial={false}
         animate={{
-          x: locale === "it" ? 2 : "calc(100% + 2px)",
+          left: locale === "it" ? "2px" : "calc(50% + 1px)",
+          width: "calc(50% - 3px)",
         }}
         transition={{ type: "spring", stiffness: 500, damping: 30 }}
         style={{
@@ -41,18 +42,18 @@ export function LanguageToggle() {
       />
 
       <span
-        className={`relative z-10 px-3 py-1 transition-colors duration-200 ${
+        className={`relative z-10 flex-1 text-center py-1 transition-colors duration-200 ${
           locale === "it"
-            ? "text-[var(--hvo-void)]"
+            ? "text-[var(--hvo-void)] font-semibold"
             : "text-[var(--hvo-text-muted)]"
         }`}
       >
         IT
       </span>
       <span
-        className={`relative z-10 px-3 py-1 transition-colors duration-200 ${
+        className={`relative z-10 flex-1 text-center py-1 transition-colors duration-200 ${
           locale === "en"
-            ? "text-[var(--hvo-void)]"
+            ? "text-[var(--hvo-void)] font-semibold"
             : "text-[var(--hvo-text-muted)]"
         }`}
       >
