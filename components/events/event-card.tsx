@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowUpRight, MapPin, Calendar } from "lucide-react";
 import type { Event } from "@/lib/database.types";
 
@@ -106,17 +107,27 @@ export function EventCard({ event, index }: EventCardProps) {
               </span>
             </div>
 
-            {/* CTA Button - Only shows when booking is open */}
-            {event.is_booking_open && event.booking_link && (
-              <a
-                href={event.booking_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-black bg-[var(--accent)] rounded-md transition-all duration-300 hover:bg-[var(--accent-hover)] hover:shadow-[0_0_20px_var(--accent-glow)]"
-              >
-                {locale === "it" ? "Prenotati" : "Book Now"}
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              </a>
+            {/* CTA Button - Shows when booking is open */}
+            {event.is_booking_open && (
+              event.booking_type === "external" && event.booking_link ? (
+                <a
+                  href={event.booking_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-black bg-[var(--accent)] rounded-md transition-all duration-300 hover:bg-[var(--accent-hover)] hover:shadow-[0_0_20px_var(--accent-glow)]"
+                >
+                  {locale === "it" ? "Prenotati" : "Book Now"}
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </a>
+              ) : event.booking_type === "internal" ? (
+                <Link
+                  href={`/${locale}/events/${event.id}/book`}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-black bg-[var(--accent)] rounded-md transition-all duration-300 hover:bg-[var(--accent-hover)] hover:shadow-[0_0_20px_var(--accent-glow)]"
+                >
+                  {locale === "it" ? "Prenotati" : "Book Now"}
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </Link>
+              ) : null
             )}
           </div>
         </div>
