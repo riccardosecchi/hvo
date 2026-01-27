@@ -157,18 +157,32 @@ export async function getFolderContents(folderId: string | null): Promise<
     }
 
     // Get subfolders
-    const { data: subfolders } = await supabase
+    let subfoldersQuery = supabase
       .from('cdn_folders')
       .select('*')
-      .eq('parent_folder_id', folderId)
       .order('name', { ascending: true });
 
+    if (folderId) {
+      subfoldersQuery = subfoldersQuery.eq('parent_folder_id', folderId);
+    } else {
+      subfoldersQuery = subfoldersQuery.is('parent_folder_id', null);
+    }
+
+    const { data: subfolders } = await subfoldersQuery;
+
     // Get file count
-    const { count: fileCount } = await supabase
+    let fileCountQuery = supabase
       .from('cdn_files')
       .select('*', { count: 'exact', head: true })
-      .eq('folder_id', folderId)
       .is('deleted_at', null);
+
+    if (folderId) {
+      fileCountQuery = fileCountQuery.eq('folder_id', folderId);
+    } else {
+      fileCountQuery = fileCountQuery.is('folder_id', null);
+    }
+
+    const { count: fileCount } = await fileCountQuery;
 
     return {
       success: true,
