@@ -37,8 +37,14 @@ export async function getFiles(
 
     let query = supabase
       .from('cdn_files')
-      .select('*')
-      .eq('folder_id', folderId);
+      .select('*');
+
+    // Handle folder_id filter - use .is() for null, .eq() for actual values
+    if (folderId === null) {
+      query = query.is('folder_id', null);
+    } else {
+      query = query.eq('folder_id', folderId);
+    }
 
     // Filter deleted files
     if (!options?.includeDeleted) {
