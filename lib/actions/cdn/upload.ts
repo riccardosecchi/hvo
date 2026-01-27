@@ -412,31 +412,6 @@ export async function cleanupExpiredSessions(): Promise<ApiResponse<{ deleted: n
   }
 }
 
-/**
- * Generate storage path for file
- */
-export function generateStoragePath(userId: string, fileName: string): string {
-  const fileId = crypto.randomUUID();
-  const sanitized = sanitizeFileName(fileName);
-  return `${userId}/${fileId}/${sanitized}`;
-}
+// Note: generateStoragePath and sanitizeFileName utilities
+// are available in '@/lib/cdn/utils'
 
-/**
- * Sanitize file name
- */
-function sanitizeFileName(fileName: string): string {
-  // Remove path traversal attempts
-  let sanitized = fileName.replace(/\.\./g, '');
-
-  // Replace dangerous characters
-  sanitized = sanitized.replace(/[<>:"/\\|?*\x00-\x1F]/g, '_');
-
-  // Limit length
-  if (sanitized.length > 255) {
-    const ext = sanitized.split('.').pop() || '';
-    const nameWithoutExt = sanitized.substring(0, sanitized.length - ext.length - 1);
-    sanitized = nameWithoutExt.substring(0, 250 - ext.length) + '.' + ext;
-  }
-
-  return sanitized;
-}
