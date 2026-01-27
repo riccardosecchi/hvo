@@ -21,13 +21,16 @@ export default async function SharedFolderPage({ params }: PageProps) {
     }
 
     const requiresPassword = result.error === 'Password required';
+    // If password is required, don't pass the partial data object (which only contains {requiresPassword: true})
+    // otherwise the component will try to render folder data that doesn't exist
+    const initialData = requiresPassword ? undefined : result.data;
 
     return (
         <div className="min-h-screen bg-black flex items-center justify-center p-4">
             <SharedFolderView
                 token={token}
                 locale={locale}
-                initialData={result.data as any}
+                initialData={initialData as any}
                 requiresPassword={requiresPassword}
             />
         </div>
