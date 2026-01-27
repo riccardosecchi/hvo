@@ -64,6 +64,7 @@ export function CdnFileGrid({
             onClick={() => onFolderClick(folder.id)}
             onEdit={() => onFolderEdit?.(folder)}
             onShare={() => onFolderShare?.(folder)}
+            onDrop={(fileIds) => onFileDrop?.(fileIds, folder.id)}
           />
         ))}
         {files.map((file) => (
@@ -100,6 +101,7 @@ export function CdnFileGrid({
               onClick={() => onFolderClick(folder.id)}
               onEdit={() => onFolderEdit?.(folder)}
               onShare={() => onFolderShare?.(folder)}
+              onDrop={(fileIds) => onFileDrop?.(fileIds, folder.id)}
             />
           ))}
           {files.map((file) => (
@@ -125,17 +127,45 @@ function FolderCard({
   onClick,
   onEdit,
   onShare,
+  onDrop,
 }: {
   folder: CdnFolder;
   onClick: () => void;
   onEdit?: () => void;
   onShare?: () => void;
+  onDrop?: (fileIds: string[]) => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const fileId = e.dataTransfer.getData('application/cdn-file-id');
+    if (fileId) {
+      onDrop?.([fileId]);
+    }
+  };
 
   return (
     <div
-      className="group relative p-4 bg-[var(--surface-1)] border border-white/[0.06] rounded-lg hover:border-[var(--accent)]/30 hover:bg-[var(--surface-2)] transition-all"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={`group relative p-4 bg-[var(--surface-1)] border rounded-lg transition-all ${isDragOver
+        ? 'border-[var(--accent)] bg-[var(--accent)]/10 ring-2 ring-[var(--accent)]/20'
+        : 'border-white/[0.06] hover:border-[var(--accent)]/30 hover:bg-[var(--surface-2)]'
+        }`}
     >
       <button
         onClick={onClick}
@@ -197,17 +227,43 @@ function FolderRow({
   onClick,
   onEdit,
   onShare,
+  onDrop,
 }: {
   folder: CdnFolder;
   onClick: () => void;
   onEdit?: () => void;
   onShare?: () => void;
+  onDrop?: (fileIds: string[]) => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const fileId = e.dataTransfer.getData('application/cdn-file-id');
+    if (fileId) {
+      onDrop?.([fileId]);
+    }
+  };
 
   return (
     <tr
-      className="hover:bg-white/[0.02] cursor-pointer transition-colors"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={`hover:bg-white/[0.02] cursor-pointer transition-colors ${isDragOver ? 'bg-[var(--accent)]/10' : ''
+        }`}
     >
       <td className="px-6 py-4" onClick={onClick}>
         <div className="flex items-center gap-3">
@@ -288,9 +344,16 @@ function FileCard({
     }
   };
 
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData('application/cdn-file-id', file.id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
   return (
     <div
-      className={`group relative p-4 bg-[var(--surface-1)] border rounded-lg transition-all ${isSelected
+      draggable
+      onDragStart={handleDragStart}
+      className={`group relative p-4 bg-[var(--surface-1)] border rounded-lg transition-all cursor-move ${isSelected
         ? 'border-[var(--accent)] bg-[var(--accent)]/5'
         : 'border-white/[0.06] hover:border-white/10 hover:bg-[var(--surface-2)]'
         }`}
@@ -423,9 +486,16 @@ function FileRow({
     }
   };
 
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData('application/cdn-file-id', file.id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
   return (
     <tr
-      className={`hover:bg-white/[0.02] transition-colors ${isSelected ? 'bg-[var(--accent)]/5' : ''
+      draggable
+      onDragStart={handleDragStart}
+      className={`hover:bg-white/[0.02] transition-colors cursor-move ${isSelected ? 'bg-[var(--accent)]/5' : ''
         }`}
     >
       <td className="px-6 py-4">

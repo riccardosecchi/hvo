@@ -4,16 +4,18 @@ import { getFolders, getFolderContents } from '@/lib/actions/cdn/folders';
 import { CdnBrowser } from '@/components/admin/cdn/CdnBrowser';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     locale: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     folder?: string;
-  };
+  }>;
 }
 
 export default async function CdnPage({ params, searchParams }: PageProps) {
-  const folderId = searchParams.folder || null;
+  const { locale } = await params;
+  const { folder } = await searchParams;
+  const folderId = folder || null;
 
   // Fetch initial data
   const [filesResult, foldersResult, contentsResult] = await Promise.all([
@@ -36,7 +38,7 @@ export default async function CdnPage({ params, searchParams }: PageProps) {
           allFolders={allFolders}
           currentFolder={currentFolder}
           currentFolderId={folderId}
-          locale={params.locale}
+          locale={locale}
         />
       </Suspense>
     </div>
