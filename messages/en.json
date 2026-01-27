@@ -38,6 +38,7 @@
     "nav": {
       "dashboard": "Dashboard",
       "events": "Events",
+      "cdn": "Files",
       "users": "Users",
       "profile": "Profile",
       "logout": "Sign Out"

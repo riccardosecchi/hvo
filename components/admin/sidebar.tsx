@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   ExternalLink,
+  FolderOpen,
 } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
@@ -37,6 +38,7 @@ export function Sidebar({ locale }: SidebarProps) {
   const navItems: NavItem[] = [
     { href: `/${locale}/admin/dashboard`, label: t("dashboard"), icon: LayoutDashboard },
     { href: `/${locale}/admin/events`, label: t("events"), icon: CalendarDays },
+    { href: `/${locale}/admin/cdn`, label: t("cdn"), icon: FolderOpen },
     { href: `/${locale}/admin/users`, label: t("users"), icon: Users },
     { href: `/${locale}/admin/profile`, label: t("profile"), icon: User },
   ];
