@@ -14,6 +14,8 @@ import {
   Download,
   Trash2,
   MoreVertical,
+  Eye,
+  Share2,
 } from 'lucide-react';
 import type { CdnFile, CdnFolder, FileViewMode } from '@/lib/types/cdn';
 import { deleteFile, getFileDownloadUrl } from '@/lib/actions/cdn/files';
@@ -27,6 +29,8 @@ interface CdnFileGridProps {
   onFileSelect: (fileId: string) => void;
   onFolderClick: (folderId: string | null) => void;
   currentFolderId: string | null;
+  onFilePreview?: (file: CdnFile) => void;
+  onFileShare?: (file: CdnFile) => void;
 }
 
 export function CdnFileGrid({
@@ -36,6 +40,8 @@ export function CdnFileGrid({
   selectedFiles,
   onFileSelect,
   onFolderClick,
+  onFilePreview,
+  onFileShare,
 }: CdnFileGridProps) {
   if (viewMode === 'grid') {
     return (
@@ -53,6 +59,8 @@ export function CdnFileGrid({
             file={file}
             isSelected={selectedFiles.has(file.id)}
             onSelect={() => onFileSelect(file.id)}
+            onPreview={() => onFilePreview?.(file)}
+            onShare={() => onFileShare?.(file)}
           />
         ))}
       </div>
@@ -84,6 +92,8 @@ export function CdnFileGrid({
               file={file}
               isSelected={selectedFiles.has(file.id)}
               onSelect={() => onFileSelect(file.id)}
+              onPreview={() => onFilePreview?.(file)}
+              onShare={() => onFileShare?.(file)}
             />
           ))}
         </tbody>
@@ -145,10 +155,14 @@ function FileCard({
   file,
   isSelected,
   onSelect,
+  onPreview,
+  onShare,
 }: {
   file: CdnFile;
   isSelected: boolean;
   onSelect: () => void;
+  onPreview?: () => void;
+  onShare?: () => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
@@ -169,11 +183,10 @@ function FileCard({
 
   return (
     <div
-      className={`group relative p-4 bg-[var(--surface-1)] border rounded-lg transition-all ${
-        isSelected
+      className={`group relative p-4 bg-[var(--surface-1)] border rounded-lg transition-all ${isSelected
           ? 'border-[var(--accent)] bg-[var(--accent)]/5'
           : 'border-white/[0.06] hover:border-white/10 hover:bg-[var(--surface-2)]'
-      }`}
+        }`}
     >
       {/* Checkbox */}
       <label className="absolute top-3 left-3 z-10 cursor-pointer">
@@ -227,6 +240,20 @@ function FileCard({
               />
               <div className="absolute right-0 top-full mt-1 w-48 py-1 bg-[var(--surface-2)] border border-white/10 rounded-lg shadow-xl z-20">
                 <button
+                  onClick={() => { setShowMenu(false); onPreview?.(); }}
+                  className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/5 flex items-center gap-2"
+                >
+                  <Eye className="w-4 h-4" />
+                  Preview
+                </button>
+                <button
+                  onClick={() => { setShowMenu(false); onShare?.(); }}
+                  className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/5 flex items-center gap-2"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </button>
+                <button
                   onClick={handleDownload}
                   className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/5 flex items-center gap-2"
                 >
@@ -254,10 +281,14 @@ function FileRow({
   file,
   isSelected,
   onSelect,
+  onPreview,
+  onShare,
 }: {
   file: CdnFile;
   isSelected: boolean;
   onSelect: () => void;
+  onPreview?: () => void;
+  onShare?: () => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
@@ -278,9 +309,8 @@ function FileRow({
 
   return (
     <tr
-      className={`hover:bg-white/[0.02] transition-colors ${
-        isSelected ? 'bg-[var(--accent)]/5' : ''
-      }`}
+      className={`hover:bg-white/[0.02] transition-colors ${isSelected ? 'bg-[var(--accent)]/5' : ''
+        }`}
     >
       <td className="px-6 py-4">
         <div className="flex items-center gap-3">
@@ -323,6 +353,20 @@ function FileRow({
                 onClick={() => setShowMenu(false)}
               />
               <div className="absolute right-0 top-full mt-1 w-48 py-1 bg-[var(--surface-2)] border border-white/10 rounded-lg shadow-xl z-20">
+                <button
+                  onClick={() => { setShowMenu(false); onPreview?.(); }}
+                  className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/5 flex items-center gap-2"
+                >
+                  <Eye className="w-4 h-4" />
+                  Preview
+                </button>
+                <button
+                  onClick={() => { setShowMenu(false); onShare?.(); }}
+                  className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/5 flex items-center gap-2"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </button>
                 <button
                   onClick={handleDownload}
                   className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/5 flex items-center gap-2"

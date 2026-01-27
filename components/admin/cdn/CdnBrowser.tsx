@@ -6,6 +6,8 @@ import type { CdnFile, CdnFolder, FileViewMode } from '@/lib/types/cdn';
 import { CdnHeader } from './CdnHeader';
 import { CdnFileGrid } from './CdnFileGrid';
 import { CdnUploadZone } from './CdnUploadZone';
+import { CdnFilePreview } from './CdnFilePreview';
+import { CdnShareModal } from './CdnShareModal';
 import { Upload, FolderPlus } from 'lucide-react';
 
 interface CdnBrowserProps {
@@ -30,21 +32,23 @@ export function CdnBrowser({
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [showUpload, setShowUpload] = useState(false);
+  const [previewFile, setPreviewFile] = useState<CdnFile | null>(null);
+  const [shareFile, setShareFile] = useState<CdnFile | null>(null);
 
   // Filter files based on search
   const filteredFiles = searchQuery
     ? initialFiles.filter(
-        (file) =>
-          file.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          file.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
+      (file) =>
+        file.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        file.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
     : initialFiles;
 
   // Filter folders based on search
   const filteredFolders = searchQuery
     ? initialFolders.filter((folder) =>
-        folder.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      folder.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     : initialFolders;
 
   const handleFolderClick = useCallback(
@@ -154,6 +158,8 @@ export function CdnBrowser({
                 onFileSelect={handleFileSelect}
                 onFolderClick={handleFolderClick}
                 currentFolderId={currentFolderId}
+                onFilePreview={setPreviewFile}
+                onFileShare={setShareFile}
               />
             )}
           </>
@@ -166,6 +172,27 @@ export function CdnBrowser({
           currentFolderId={currentFolderId}
           onClose={() => setShowUpload(false)}
           onComplete={handleRefresh}
+        />
+      )}
+
+      {/* Preview modal */}
+      {previewFile && (
+        <CdnFilePreview
+          file={previewFile}
+          onClose={() => setPreviewFile(null)}
+          onShare={() => {
+            setShareFile(previewFile);
+            setPreviewFile(null);
+          }}
+        />
+      )}
+
+      {/* Share modal */}
+      {shareFile && (
+        <CdnShareModal
+          file={shareFile}
+          locale={locale}
+          onClose={() => setShareFile(null)}
         />
       )}
     </div>
