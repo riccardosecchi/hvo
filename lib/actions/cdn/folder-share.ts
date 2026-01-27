@@ -140,6 +140,8 @@ export async function getFolderShareLinks(folderId: string): Promise<ApiResponse
     }
 }
 
+import { createAdminClient } from '@/lib/supabase/admin';
+
 /**
  * Validate a folder share link
  */
@@ -151,9 +153,11 @@ export async function validateFolderShareLink(
     files: any[];
     allowPreview: boolean;
     allowDownload: boolean;
+    requiresPassword?: boolean;
 }>> {
     try {
-        const supabase = await createClient();
+        // Use admin client to bypass RLS (as public users won't have access to cdn_folders table directly)
+        const supabase = createAdminClient();
 
         // Get share link
         const { data: link, error } = await supabase
