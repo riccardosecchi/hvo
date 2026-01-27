@@ -29,6 +29,13 @@ export function SharedFolderView({
     const [data, setData] = useState(initialData || null);
     const [loading, setLoading] = useState(false);
 
+    // Debug log
+    /*
+    useEffect(() => {
+        console.log('SharedFolderView mounted', { token, locale, initialData, requiresPassword, data });
+    }, [token, locale, initialData, requiresPassword, data]);
+    */
+
     async function handlePasswordSubmit(e: React.FormEvent) {
         e.preventDefault();
         setLoading(true);

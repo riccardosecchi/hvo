@@ -10,7 +10,7 @@ import { CdnFilePreview } from './CdnFilePreview';
 import { CdnShareModal } from './CdnShareModal';
 import { CdnCreateFolderModal } from './CdnCreateFolderModal';
 import { CdnFolderActionsModal } from './CdnFolderActionsModal';
-import { CdnFolderShareModal } from './CdnFolderShareModal';
+import { CdnFolderShareModal } from '@/components/admin/cdn/CdnFolderShareModal';
 import { CdnMoveFileModal } from './CdnMoveFileModal';
 import { moveFiles } from '@/lib/actions/cdn/files';
 import { Upload, FolderPlus } from 'lucide-react';
