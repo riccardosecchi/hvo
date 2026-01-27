@@ -9,6 +9,7 @@ import {
   completeUpload,
   updateSessionProgress,
 } from '@/lib/actions/cdn/upload';
+import { createFile } from '@/lib/actions/cdn/files';
 import { uploadFileDirect, uploadFileInChunks, generateStoragePath } from '@/lib/cdn/upload';
 
 interface CdnUploadZoneProps {
@@ -72,18 +73,19 @@ export function CdnUploadZone({
               });
             });
 
-            // Create file record
-            const fileResult = await supabase.from('cdn_files').insert({
+            // Create file record using server action (bypasses RLS issues)
+            const fileResult = await createFile({
               name: file.name,
               display_name: file.name,
               mime_type: file.type || 'application/octet-stream',
               file_size: file.size,
               storage_path: storagePath,
               folder_id: currentFolderId,
-              uploaded_by: user.id,
             });
 
-            if (fileResult.error) throw fileResult.error;
+            if (!fileResult.success) {
+              throw new Error(fileResult.error || 'Failed to create file record');
+            }
           } else {
             // Chunked upload for large files
             const sessionResult = await createUploadSession({
@@ -224,11 +226,10 @@ export function CdnUploadZone({
           {!hasUploads && (
             <div
               {...getRootProps()}
-              className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors cursor-pointer ${
-                isDragActive
+              className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors cursor-pointer ${isDragActive
                   ? 'border-[var(--accent)] bg-[var(--accent)]/5'
                   : 'border-white/10 hover:border-white/20 hover:bg-white/5'
-              }`}
+                }`}
             >
               <input {...getInputProps()} />
               <Upload className="w-12 h-12 mx-auto mb-4 text-[var(--text-muted)]" />
