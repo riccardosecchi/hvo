@@ -112,6 +112,7 @@ export function CdnBrowser({
         onRefresh={handleRefresh}
         selectedCount={selectedFiles.size}
         onClearSelection={handleClearSelection}
+        locale={locale}
       />
 
       {/* Main content */}

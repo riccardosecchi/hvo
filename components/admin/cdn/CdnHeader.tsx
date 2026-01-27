@@ -15,6 +15,7 @@ interface CdnHeaderProps {
   onRefresh: () => void;
   selectedCount: number;
   onClearSelection: () => void;
+  locale: string;
 }
 
 export function CdnHeader({
@@ -28,13 +29,14 @@ export function CdnHeader({
   onRefresh,
   selectedCount,
   onClearSelection,
+  locale,
 }: CdnHeaderProps) {
   return (
     <div className="border-b border-white/[0.06] bg-[var(--surface-1)]">
       {/* Breadcrumbs */}
       <div className="px-6 py-3 flex items-center gap-2 text-sm">
         <Link
-          href="/admin/cdn"
+          href={`/${locale}/admin/cdn`}
           className="text-[var(--text-muted)] hover:text-white transition-colors"
         >
           Home
@@ -90,8 +92,8 @@ export function CdnHeader({
             <button
               onClick={() => onViewModeChange('grid')}
               className={`p-1.5 rounded transition-colors ${viewMode === 'grid'
-                  ? 'bg-[var(--accent)] text-white'
-                  : 'text-[var(--text-muted)] hover:text-white'
+                ? 'bg-[var(--accent)] text-white'
+                : 'text-[var(--text-muted)] hover:text-white'
                 }`}
               title="Grid view"
             >
@@ -100,8 +102,8 @@ export function CdnHeader({
             <button
               onClick={() => onViewModeChange('list')}
               className={`p-1.5 rounded transition-colors ${viewMode === 'list'
-                  ? 'bg-[var(--accent)] text-white'
-                  : 'text-[var(--text-muted)] hover:text-white'
+                ? 'bg-[var(--accent)] text-white'
+                : 'text-[var(--text-muted)] hover:text-white'
                 }`}
               title="List view"
             >
