@@ -293,12 +293,11 @@ export async function uploadFileInChunks(
         } catch (error: any) {
           await failUploadSession(sessionToken, error.message);
           throw error;
-        } finally {
-          activeUploads.delete(uploadPromise);
         }
       })();
 
       activeUploads.add(uploadPromise);
+      uploadPromise.finally(() => activeUploads.delete(uploadPromise));
     }
 
     // Wait for at least one upload to complete

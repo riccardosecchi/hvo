@@ -130,7 +130,7 @@ export async function deriveKeyFromPassphrase(
   const key = await crypto.subtle.deriveKey(
     {
       name: KEY_DERIVATION_ALGORITHM,
-      salt: salt,
+      salt: salt as BufferSource,
       iterations: iterations,
       hash: HASH_ALGORITHM,
     },
@@ -209,7 +209,7 @@ export async function decryptFileKey(
 ): Promise<CryptoKey> {
   // Decrypt file key bytes
   const fileKeyBytes = await crypto.subtle.decrypt(
-    { name: ENCRYPTION_ALGORITHM, iv: iv },
+    { name: ENCRYPTION_ALGORITHM, iv: iv as BufferSource },
     masterKey,
     encryptedKey
   );
@@ -377,7 +377,7 @@ export async function decryptFile(
 
   // Decrypt file data
   const decryptedData = await crypto.subtle.decrypt(
-    { name: ENCRYPTION_ALGORITHM, iv: dataIv },
+    { name: ENCRYPTION_ALGORITHM, iv: dataIv as BufferSource },
     fileKey,
     encryptedData
   );
@@ -419,7 +419,7 @@ export async function decryptFileInChunks(
     const chunkIv = chunkIVs[i];
 
     const decryptedChunk = await crypto.subtle.decrypt(
-      { name: ENCRYPTION_ALGORITHM, iv: chunkIv },
+      { name: ENCRYPTION_ALGORITHM, iv: chunkIv as BufferSource },
       fileKey,
       encryptedChunk
     );

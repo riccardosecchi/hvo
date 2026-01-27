@@ -24,7 +24,7 @@ export default async function CdnPage({ params, searchParams }: PageProps) {
 
   const files = filesResult.success ? filesResult.data || [] : [];
   const allFolders = foldersResult.success ? foldersResult.data || [] : [];
-  const currentFolder = contentsResult.success ? contentsResult.data?.folder : null;
+  const currentFolder = contentsResult.success ? (contentsResult.data?.folder || null) : null;
   const subfolders = contentsResult.success ? contentsResult.data?.subfolders || [] : [];
 
   return (

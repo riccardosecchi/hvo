@@ -150,7 +150,7 @@ export async function updateSessionProgress(
     const uploadedIndexes = session.uploaded_chunk_indexes || [];
     if (!uploadedIndexes.includes(chunkIndex)) {
       uploadedIndexes.push(chunkIndex);
-      uploadedIndexes.sort((a, b) => a - b);
+      uploadedIndexes.sort((a: number, b: number) => a - b);
     }
 
     // Update session
