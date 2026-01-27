@@ -452,6 +452,52 @@ export async function moveFile(
 }
 
 /**
+ * Move multiple files to a different folder
+ */
+export async function moveFiles(
+  fileIds: string[],
+  targetFolderId: string | null
+): Promise<ApiResponse<{ moved: number; failed: number }>> {
+  try {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    const { data, error } = await supabase
+      .from('cdn_files')
+      .update({ folder_id: targetFolderId })
+      .in('id', fileIds)
+      .select();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    // Log bulk move
+    await supabase.rpc('cdn_log_action', {
+      p_action_type: 'file_move',
+      p_metadata: {
+        files_moved: fileIds.length,
+        target_folder_id: targetFolderId,
+      },
+    });
+
+    revalidatePath('/[locale]/admin/cdn', 'page');
+
+    return {
+      success: true,
+      data: { moved: data?.length || 0, failed: fileIds.length - (data?.length || 0) },
+      message: `${data?.length || 0} files moved successfully`
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Duplicate a file
  */
 export async function duplicateFile(fileId: string): Promise<ApiResponse<CdnFile>> {

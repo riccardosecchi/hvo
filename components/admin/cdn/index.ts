@@ -9,3 +9,4 @@ export { CdnVersions } from './CdnVersions';
 export { CdnCreateFolderModal } from './CdnCreateFolderModal';
 export { CdnFolderActionsModal } from './CdnFolderActionsModal';
 export { CdnFolderShareModal } from './CdnFolderShareModal';
+export { CdnMoveFileModal } from './CdnMoveFileModal';

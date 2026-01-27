@@ -16,6 +16,7 @@ import {
   MoreVertical,
   Eye,
   Share2,
+  FolderInput,
 } from 'lucide-react';
 import type { CdnFile, CdnFolder, FileViewMode } from '@/lib/types/cdn';
 import { deleteFile, getFileDownloadUrl } from '@/lib/actions/cdn/files';
@@ -24,6 +25,7 @@ import { useRouter } from 'next/navigation';
 interface CdnFileGridProps {
   files: CdnFile[];
   folders: CdnFolder[];
+  allFolders?: CdnFolder[];
   viewMode: FileViewMode;
   selectedFiles: Set<string>;
   onFileSelect: (fileId: string) => void;
@@ -31,21 +33,26 @@ interface CdnFileGridProps {
   currentFolderId: string | null;
   onFilePreview?: (file: CdnFile) => void;
   onFileShare?: (file: CdnFile) => void;
+  onFileMove?: (file: CdnFile) => void;
   onFolderEdit?: (folder: CdnFolder) => void;
   onFolderShare?: (folder: CdnFolder) => void;
+  onFileDrop?: (fileIds: string[], folderId: string | null) => void;
 }
 
 export function CdnFileGrid({
   files,
   folders,
+  allFolders,
   viewMode,
   selectedFiles,
   onFileSelect,
   onFolderClick,
   onFilePreview,
   onFileShare,
+  onFileMove,
   onFolderEdit,
   onFolderShare,
+  onFileDrop,
 }: CdnFileGridProps) {
   if (viewMode === 'grid') {
     return (
@@ -67,6 +74,7 @@ export function CdnFileGrid({
             onSelect={() => onFileSelect(file.id)}
             onPreview={() => onFilePreview?.(file)}
             onShare={() => onFileShare?.(file)}
+            onMove={() => onFileMove?.(file)}
           />
         ))}
       </div>
@@ -102,6 +110,7 @@ export function CdnFileGrid({
               onSelect={() => onFileSelect(file.id)}
               onPreview={() => onFilePreview?.(file)}
               onShare={() => onFileShare?.(file)}
+              onMove={() => onFileMove?.(file)}
             />
           ))}
         </tbody>
@@ -253,12 +262,14 @@ function FileCard({
   onSelect,
   onPreview,
   onShare,
+  onMove,
 }: {
   file: CdnFile;
   isSelected: boolean;
   onSelect: () => void;
   onPreview?: () => void;
   onShare?: () => void;
+  onMove?: () => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
@@ -350,6 +361,13 @@ function FileCard({
                   Share
                 </button>
                 <button
+                  onClick={() => { setShowMenu(false); onMove?.(); }}
+                  className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/5 flex items-center gap-2"
+                >
+                  <FolderInput className="w-4 h-4" />
+                  Move to...
+                </button>
+                <button
                   onClick={handleDownload}
                   className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/5 flex items-center gap-2"
                 >
@@ -379,12 +397,14 @@ function FileRow({
   onSelect,
   onPreview,
   onShare,
+  onMove,
 }: {
   file: CdnFile;
   isSelected: boolean;
   onSelect: () => void;
   onPreview?: () => void;
   onShare?: () => void;
+  onMove?: () => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
@@ -462,6 +482,13 @@ function FileRow({
                 >
                   <Share2 className="w-4 h-4" />
                   Share
+                </button>
+                <button
+                  onClick={() => { setShowMenu(false); onMove?.(); }}
+                  className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/5 flex items-center gap-2"
+                >
+                  <FolderInput className="w-4 h-4" />
+                  Move to...
                 </button>
                 <button
                   onClick={handleDownload}

@@ -11,6 +11,8 @@ import { CdnShareModal } from './CdnShareModal';
 import { CdnCreateFolderModal } from './CdnCreateFolderModal';
 import { CdnFolderActionsModal } from './CdnFolderActionsModal';
 import { CdnFolderShareModal } from './CdnFolderShareModal';
+import { CdnMoveFileModal } from './CdnMoveFileModal';
+import { moveFiles } from '@/lib/actions/cdn/files';
 import { Upload, FolderPlus } from 'lucide-react';
 
 interface CdnBrowserProps {
@@ -40,6 +42,7 @@ export function CdnBrowser({
   const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [editingFolder, setEditingFolder] = useState<CdnFolder | null>(null);
   const [sharingFolder, setSharingFolder] = useState<CdnFolder | null>(null);
+  const [movingFiles, setMovingFiles] = useState<CdnFile[]>([]);
 
   // Filter files based on search
   const filteredFiles = searchQuery
@@ -160,6 +163,7 @@ export function CdnBrowser({
               <CdnFileGrid
                 files={filteredFiles}
                 folders={filteredFolders}
+                allFolders={allFolders}
                 viewMode={viewMode}
                 selectedFiles={selectedFiles}
                 onFileSelect={handleFileSelect}
@@ -167,8 +171,13 @@ export function CdnBrowser({
                 currentFolderId={currentFolderId}
                 onFilePreview={setPreviewFile}
                 onFileShare={setShareFile}
+                onFileMove={(file) => setMovingFiles([file])}
                 onFolderEdit={setEditingFolder}
                 onFolderShare={setSharingFolder}
+                onFileDrop={async (fileIds, folderId) => {
+                  await moveFiles(fileIds, folderId);
+                  handleRefresh();
+                }}
               />
             )}
           </>
@@ -230,6 +239,20 @@ export function CdnBrowser({
           folder={sharingFolder}
           locale={locale}
           onClose={() => setSharingFolder(null)}
+        />
+      )}
+
+      {/* Move file modal */}
+      {movingFiles.length > 0 && (
+        <CdnMoveFileModal
+          files={movingFiles}
+          folders={allFolders}
+          currentFolderId={currentFolderId}
+          onClose={() => setMovingFiles([])}
+          onSuccess={() => {
+            setMovingFiles([]);
+            handleRefresh();
+          }}
         />
       )}
     </div>
