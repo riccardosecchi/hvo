@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Upload, Grid3x3, List, RefreshCw, X, ChevronRight } from 'lucide-react';
+import { Search, Upload, Grid3x3, List, RefreshCw, X, ChevronRight, FolderPlus } from 'lucide-react';
 import type { CdnFolder, FileViewMode } from '@/lib/types/cdn';
 import Link from 'next/link';
 
@@ -11,6 +11,7 @@ interface CdnHeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onUploadClick: () => void;
+  onCreateFolderClick: () => void;
   onRefresh: () => void;
   selectedCount: number;
   onClearSelection: () => void;
@@ -23,6 +24,7 @@ export function CdnHeader({
   searchQuery,
   onSearchChange,
   onUploadClick,
+  onCreateFolderClick,
   onRefresh,
   selectedCount,
   onClearSelection,
@@ -87,22 +89,20 @@ export function CdnHeader({
           <div className="flex items-center gap-1 p-1 bg-[var(--surface-2)] rounded-md border border-white/[0.06]">
             <button
               onClick={() => onViewModeChange('grid')}
-              className={`p-1.5 rounded transition-colors ${
-                viewMode === 'grid'
+              className={`p-1.5 rounded transition-colors ${viewMode === 'grid'
                   ? 'bg-[var(--accent)] text-white'
                   : 'text-[var(--text-muted)] hover:text-white'
-              }`}
+                }`}
               title="Grid view"
             >
               <Grid3x3 className="w-4 h-4" />
             </button>
             <button
               onClick={() => onViewModeChange('list')}
-              className={`p-1.5 rounded transition-colors ${
-                viewMode === 'list'
+              className={`p-1.5 rounded transition-colors ${viewMode === 'list'
                   ? 'bg-[var(--accent)] text-white'
                   : 'text-[var(--text-muted)] hover:text-white'
-              }`}
+                }`}
               title="List view"
             >
               <List className="w-4 h-4" />
@@ -116,6 +116,16 @@ export function CdnHeader({
             title="Refresh"
           >
             <RefreshCw className="w-4 h-4" />
+          </button>
+
+          {/* Create Folder button */}
+          <button
+            onClick={onCreateFolderClick}
+            className="flex items-center gap-2 px-3 py-2 rounded-md border border-white/[0.06] text-white hover:bg-white/5 transition-colors"
+            title="Create folder"
+          >
+            <FolderPlus className="w-4 h-4" />
+            <span className="hidden sm:inline">Folder</span>
           </button>
 
           {/* Upload button */}

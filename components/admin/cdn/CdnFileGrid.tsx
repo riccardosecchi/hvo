@@ -31,6 +31,8 @@ interface CdnFileGridProps {
   currentFolderId: string | null;
   onFilePreview?: (file: CdnFile) => void;
   onFileShare?: (file: CdnFile) => void;
+  onFolderEdit?: (folder: CdnFolder) => void;
+  onFolderShare?: (folder: CdnFolder) => void;
 }
 
 export function CdnFileGrid({
@@ -42,6 +44,8 @@ export function CdnFileGrid({
   onFolderClick,
   onFilePreview,
   onFileShare,
+  onFolderEdit,
+  onFolderShare,
 }: CdnFileGridProps) {
   if (viewMode === 'grid') {
     return (
@@ -51,6 +55,8 @@ export function CdnFileGrid({
             key={folder.id}
             folder={folder}
             onClick={() => onFolderClick(folder.id)}
+            onEdit={() => onFolderEdit?.(folder)}
+            onShare={() => onFolderShare?.(folder)}
           />
         ))}
         {files.map((file) => (
@@ -84,6 +90,8 @@ export function CdnFileGrid({
               key={folder.id}
               folder={folder}
               onClick={() => onFolderClick(folder.id)}
+              onEdit={() => onFolderEdit?.(folder)}
+              onShare={() => onFolderShare?.(folder)}
             />
           ))}
           {files.map((file) => (
@@ -103,13 +111,27 @@ export function CdnFileGrid({
 }
 
 // Folder Card (Grid View)
-function FolderCard({ folder, onClick }: { folder: CdnFolder; onClick: () => void }) {
+function FolderCard({
+  folder,
+  onClick,
+  onEdit,
+  onShare,
+}: {
+  folder: CdnFolder;
+  onClick: () => void;
+  onEdit?: () => void;
+  onShare?: () => void;
+}) {
+  const [showMenu, setShowMenu] = useState(false);
+
   return (
-    <button
-      onClick={onClick}
-      className="group relative p-4 bg-[var(--surface-1)] border border-white/[0.06] rounded-lg hover:border-[var(--accent)]/30 hover:bg-[var(--surface-2)] transition-all text-left"
+    <div
+      className="group relative p-4 bg-[var(--surface-1)] border border-white/[0.06] rounded-lg hover:border-[var(--accent)]/30 hover:bg-[var(--surface-2)] transition-all"
     >
-      <div className="flex items-start gap-3">
+      <button
+        onClick={onClick}
+        className="flex items-start gap-3 text-left w-full"
+      >
         <div className="flex-shrink-0 w-10 h-10 rounded-md bg-[var(--accent)]/10 flex items-center justify-center">
           <Folder className="w-5 h-5 text-[var(--accent)]" />
         </div>
@@ -121,19 +143,64 @@ function FolderCard({ folder, onClick }: { folder: CdnFolder; onClick: () => voi
             {format(new Date(folder.created_at), 'MMM d, yyyy')}
           </p>
         </div>
+      </button>
+
+      {/* Folder actions */}
+      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="relative">
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+            className="p-1.5 rounded-md bg-[var(--surface-2)] text-[var(--text-muted)] hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <MoreVertical className="w-4 h-4" />
+          </button>
+
+          {showMenu && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
+              <div className="absolute right-0 top-full mt-1 w-40 py-1 bg-[var(--surface-2)] border border-white/10 rounded-lg shadow-xl z-20">
+                <button
+                  onClick={() => { setShowMenu(false); onEdit?.(); }}
+                  className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/5 flex items-center gap-2"
+                >
+                  <MoreVertical className="w-4 h-4" />
+                  Options
+                </button>
+                <button
+                  onClick={() => { setShowMenu(false); onShare?.(); }}
+                  className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/5 flex items-center gap-2"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
-    </button>
+    </div>
   );
 }
 
 // Folder Row (List View)
-function FolderRow({ folder, onClick }: { folder: CdnFolder; onClick: () => void }) {
+function FolderRow({
+  folder,
+  onClick,
+  onEdit,
+  onShare,
+}: {
+  folder: CdnFolder;
+  onClick: () => void;
+  onEdit?: () => void;
+  onShare?: () => void;
+}) {
+  const [showMenu, setShowMenu] = useState(false);
+
   return (
     <tr
-      onClick={onClick}
       className="hover:bg-white/[0.02] cursor-pointer transition-colors"
     >
-      <td className="px-6 py-4">
+      <td className="px-6 py-4" onClick={onClick}>
         <div className="flex items-center gap-3">
           <Folder className="w-5 h-5 text-[var(--accent)] flex-shrink-0" />
           <span className="text-sm text-white font-medium truncate">{folder.name}</span>
@@ -145,7 +212,36 @@ function FolderRow({ folder, onClick }: { folder: CdnFolder; onClick: () => void
       <td className="px-6 py-4 text-sm text-[var(--text-muted)] hidden lg:table-cell">
         {format(new Date(folder.created_at), 'MMM d, yyyy')}
       </td>
-      <td className="px-6 py-4"></td>
+      <td className="px-6 py-4">
+        <div className="relative">
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+            className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-white hover:bg-white/5 transition-colors"
+          >
+            <MoreVertical className="w-4 h-4" />
+          </button>
+
+          {showMenu && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
+              <div className="absolute right-0 top-full mt-1 w-40 py-1 bg-[var(--surface-2)] border border-white/10 rounded-lg shadow-xl z-20">
+                <button
+                  onClick={() => { setShowMenu(false); onEdit?.(); }}
+                  className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/5"
+                >
+                  Options
+                </button>
+                <button
+                  onClick={() => { setShowMenu(false); onShare?.(); }}
+                  className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/5"
+                >
+                  Share
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </td>
     </tr>
   );
 }
@@ -184,8 +280,8 @@ function FileCard({
   return (
     <div
       className={`group relative p-4 bg-[var(--surface-1)] border rounded-lg transition-all ${isSelected
-          ? 'border-[var(--accent)] bg-[var(--accent)]/5'
-          : 'border-white/[0.06] hover:border-white/10 hover:bg-[var(--surface-2)]'
+        ? 'border-[var(--accent)] bg-[var(--accent)]/5'
+        : 'border-white/[0.06] hover:border-white/10 hover:bg-[var(--surface-2)]'
         }`}
     >
       {/* Checkbox */}

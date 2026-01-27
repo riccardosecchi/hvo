@@ -8,6 +8,9 @@ import { CdnFileGrid } from './CdnFileGrid';
 import { CdnUploadZone } from './CdnUploadZone';
 import { CdnFilePreview } from './CdnFilePreview';
 import { CdnShareModal } from './CdnShareModal';
+import { CdnCreateFolderModal } from './CdnCreateFolderModal';
+import { CdnFolderActionsModal } from './CdnFolderActionsModal';
+import { CdnFolderShareModal } from './CdnFolderShareModal';
 import { Upload, FolderPlus } from 'lucide-react';
 
 interface CdnBrowserProps {
@@ -34,6 +37,9 @@ export function CdnBrowser({
   const [showUpload, setShowUpload] = useState(false);
   const [previewFile, setPreviewFile] = useState<CdnFile | null>(null);
   const [shareFile, setShareFile] = useState<CdnFile | null>(null);
+  const [showCreateFolder, setShowCreateFolder] = useState(false);
+  const [editingFolder, setEditingFolder] = useState<CdnFolder | null>(null);
+  const [sharingFolder, setSharingFolder] = useState<CdnFolder | null>(null);
 
   // Filter files based on search
   const filteredFiles = searchQuery
@@ -99,6 +105,7 @@ export function CdnBrowser({
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onUploadClick={() => setShowUpload(true)}
+        onCreateFolderClick={() => setShowCreateFolder(true)}
         onRefresh={handleRefresh}
         selectedCount={selectedFiles.size}
         onClearSelection={handleClearSelection}
@@ -160,6 +167,8 @@ export function CdnBrowser({
                 currentFolderId={currentFolderId}
                 onFilePreview={setPreviewFile}
                 onFileShare={setShareFile}
+                onFolderEdit={setEditingFolder}
+                onFolderShare={setSharingFolder}
               />
             )}
           </>
@@ -193,6 +202,34 @@ export function CdnBrowser({
           file={shareFile}
           locale={locale}
           onClose={() => setShareFile(null)}
+        />
+      )}
+
+      {/* Create folder modal */}
+      {showCreateFolder && (
+        <CdnCreateFolderModal
+          parentFolderId={currentFolderId}
+          onClose={() => setShowCreateFolder(false)}
+          onSuccess={handleRefresh}
+        />
+      )}
+
+      {/* Folder actions modal */}
+      {editingFolder && (
+        <CdnFolderActionsModal
+          folder={editingFolder}
+          allFolders={allFolders}
+          onClose={() => setEditingFolder(null)}
+          onSuccess={handleRefresh}
+        />
+      )}
+
+      {/* Folder share modal */}
+      {sharingFolder && (
+        <CdnFolderShareModal
+          folder={sharingFolder}
+          locale={locale}
+          onClose={() => setSharingFolder(null)}
         />
       )}
     </div>

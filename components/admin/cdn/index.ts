@@ -6,3 +6,6 @@ export { CdnFilePreview } from './CdnFilePreview';
 export { CdnShareModal } from './CdnShareModal';
 export { CdnComments } from './CdnComments';
 export { CdnVersions } from './CdnVersions';
+export { CdnCreateFolderModal } from './CdnCreateFolderModal';
+export { CdnFolderActionsModal } from './CdnFolderActionsModal';
+export { CdnFolderShareModal } from './CdnFolderShareModal';
