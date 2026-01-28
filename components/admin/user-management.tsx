@@ -51,6 +51,10 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
   const waitingForRegistration = invites.filter((i) => !i.is_confirmed && !i.has_registered);
   // Invites where user registered but master admin hasn't confirmed yet
   const pendingConfirmation = invites.filter((i) => !i.is_confirmed && i.has_registered);
+  // Invites that are confirmed but user never actually registered (orphaned)
+  const confirmedWithoutProfile = invites.filter((i) =>
+    i.is_confirmed && !profiles.some((p) => p.email === i.email)
+  );
   const activeAdmins = profiles.filter((p) => !p.is_master_admin && !p.is_suspended);
   const suspendedAdmins = profiles.filter((p) => !p.is_master_admin && p.is_suspended);
 
@@ -478,6 +482,53 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Orphaned confirmed invites (confirmed but user never registered) */}
+      {isMasterAdmin && confirmedWithoutProfile.length > 0 && (
+        <div className="bg-[var(--surface-1)] border border-white/[0.06] rounded-lg overflow-hidden">
+          <div className="p-4 border-b border-white/[0.06] flex items-center gap-3">
+            <div className="p-2 rounded-md bg-orange-500/10">
+              <AlertTriangle className="w-5 h-5 text-orange-400" />
+            </div>
+            <h2 className="font-semibold text-lg text-white">Inviti Orfani</h2>
+            <span className="ml-auto px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 text-xs font-medium">
+              {confirmedWithoutProfile.length}
+            </span>
+          </div>
+          <div className="p-4">
+            <p className="text-xs text-[var(--text-muted)] mb-4">
+              Questi inviti sono stati confermati ma l&apos;utente non si è mai registrato.
+            </p>
+            <div className="space-y-2">
+              {confirmedWithoutProfile.map((invite) => (
+                <div
+                  key={invite.id}
+                  className="flex items-center gap-3 p-3 bg-[var(--surface-2)] rounded-md"
+                >
+                  <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
+                    <span className="text-orange-400 text-sm font-medium">
+                      {invite.email.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <span className="text-sm text-white">{invite.email}</span>
+                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                      Confermato ma mai registrato
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setConfirmDialog({ type: "cancel", id: invite.id, email: invite.email })}
+                    className="p-2 text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
+                    title="Elimina invito"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               ))}
             </div>
