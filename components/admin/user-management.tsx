@@ -63,13 +63,45 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
 
     const token = crypto.randomUUID();
 
-    const { error } = await supabase.from("admin_invites").insert({
-      email,
-      invitation_token: token,
-      invited_by: user?.id,
-    });
+    // Check if invite already exists for this email
+    const { data: existingInvite } = await supabase
+      .from("admin_invites")
+      .select("id, is_confirmed")
+      .eq("email", email)
+      .single();
 
-    if (!error) {
+    let error = null;
+
+    if (existingInvite) {
+      if (existingInvite.is_confirmed) {
+        alert("Questo utente è già stato confermato come admin.");
+        setLoading(false);
+        return;
+      }
+      // Update existing invite with new token
+      const result = await supabase
+        .from("admin_invites")
+        .update({
+          invitation_token: token,
+          has_registered: false,
+          registered_at: null,
+        })
+        .eq("id", existingInvite.id);
+      error = result.error;
+    } else {
+      // Create new invite
+      const result = await supabase.from("admin_invites").insert({
+        email,
+        invitation_token: token,
+        invited_by: user?.id,
+      });
+      error = result.error;
+    }
+
+    if (error) {
+      console.error("Error creating invite:", error);
+      alert(`Errore: ${error.message}`);
+    } else {
       const link = `${window.location.origin}/${locale}/admin/register?token=${token}`;
       setGeneratedLink(link);
       setEmail("");
