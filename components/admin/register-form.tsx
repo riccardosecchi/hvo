@@ -36,14 +36,14 @@ export function RegisterForm({ locale }: RegisterFormProps) {
       }
 
       const supabase = createClient();
-      const { data } = await supabase
-        .from("admin_invites")
-        .select("email, is_confirmed")
-        .eq("invitation_token", token)
-        .single();
 
-      if (data && !data.is_confirmed) {
-        setEmail(data.email);
+      // Use RPC function that allows anonymous access
+      const { data, error } = await supabase.rpc("validate_invite_token", {
+        p_token: token,
+      });
+
+      if (!error && data && data.length > 0 && data[0].is_valid) {
+        setEmail(data[0].email);
         setValidToken(true);
       }
       setChecking(false);
@@ -51,6 +51,7 @@ export function RegisterForm({ locale }: RegisterFormProps) {
 
     checkToken();
   }, [token]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

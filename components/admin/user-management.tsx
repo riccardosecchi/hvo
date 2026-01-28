@@ -19,7 +19,9 @@ import {
   X,
   AlertTriangle,
   Shield,
-  ShieldOff
+  ShieldOff,
+  Link2,
+  UserCheck
 } from "lucide-react";
 import type { AdminInvite, Profile } from "@/lib/database.types";
 
@@ -45,7 +47,10 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
     email: string;
   } | null>(null);
 
-  const pendingInvites = invites.filter((i) => !i.is_confirmed);
+  // Invites where user hasn't registered yet (waiting for registration)
+  const waitingForRegistration = invites.filter((i) => !i.is_confirmed && !i.has_registered);
+  // Invites where user registered but master admin hasn't confirmed yet
+  const pendingConfirmation = invites.filter((i) => !i.is_confirmed && i.has_registered);
   const activeAdmins = profiles.filter((p) => !p.is_master_admin && !p.is_suspended);
   const suspendedAdmins = profiles.filter((p) => !p.is_master_admin && p.is_suspended);
 
@@ -224,8 +229,8 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
                 <button
                   onClick={copyLink}
                   className={`h-10 px-4 rounded-md border transition-colors flex items-center gap-2 ${copied
-                      ? "bg-green-500/10 border-green-500/30 text-green-400"
-                      : "bg-[var(--surface-1)] border-white/[0.06] text-[var(--text-muted)] hover:text-white"
+                    ? "bg-green-500/10 border-green-500/30 text-green-400"
+                    : "bg-[var(--surface-1)] border-white/[0.06] text-[var(--text-muted)] hover:text-white"
                     }`}
                 >
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -239,25 +244,65 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
         </div>
       </div>
 
-      {/* Pending Invites */}
-      {isMasterAdmin && pendingInvites.length > 0 && (
+      {/* Invites waiting for registration (link sent but user hasn't registered yet) */}
+      {isMasterAdmin && waitingForRegistration.length > 0 && (
         <div className="bg-[var(--surface-1)] border border-white/[0.06] rounded-lg overflow-hidden">
           <div className="p-4 border-b border-white/[0.06] flex items-center gap-3">
-            <div className="p-2 rounded-md bg-amber-500/10">
-              <Clock className="w-5 h-5 text-amber-400" />
+            <div className="p-2 rounded-md bg-blue-500/10">
+              <Link2 className="w-5 h-5 text-blue-400" />
             </div>
-            <h2 className="font-semibold text-lg text-white">{t("pending")}</h2>
-            <span className="ml-auto px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-xs font-medium">
-              {pendingInvites.length}
+            <h2 className="font-semibold text-lg text-white">Link Inviati</h2>
+            <span className="ml-auto px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 text-xs font-medium">
+              {waitingForRegistration.length}
             </span>
           </div>
           <div className="divide-y divide-white/[0.06]">
-            {pendingInvites.map((invite) => (
+            {waitingForRegistration.map((invite) => (
               <div
                 key={invite.id}
                 className="flex items-center justify-between p-4"
               >
-                <span className="text-sm text-white">{invite.email}</span>
+                <div>
+                  <span className="text-sm text-white">{invite.email}</span>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">In attesa di registrazione</p>
+                </div>
+                <button
+                  onClick={() => setConfirmDialog({ type: "cancel", id: invite.id, email: invite.email })}
+                  className="p-2 text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
+                  title="Annulla invito"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Users registered but pending confirmation */}
+      {isMasterAdmin && pendingConfirmation.length > 0 && (
+        <div className="bg-[var(--surface-1)] border border-white/[0.06] rounded-lg overflow-hidden">
+          <div className="p-4 border-b border-white/[0.06] flex items-center gap-3">
+            <div className="p-2 rounded-md bg-amber-500/10">
+              <UserCheck className="w-5 h-5 text-amber-400" />
+            </div>
+            <h2 className="font-semibold text-lg text-white">In Attesa Conferma</h2>
+            <span className="ml-auto px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-xs font-medium">
+              {pendingConfirmation.length}
+            </span>
+          </div>
+          <div className="divide-y divide-white/[0.06]">
+            {pendingConfirmation.map((invite) => (
+              <div
+                key={invite.id}
+                className="flex items-center justify-between p-4"
+              >
+                <div>
+                  <span className="text-sm text-white">{invite.email}</span>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    Registrato {invite.registered_at && new Date(invite.registered_at).toLocaleDateString("it-IT")}
+                  </p>
+                </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => confirmUser(invite.id)}
@@ -273,7 +318,7 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
                   <button
                     onClick={() => setConfirmDialog({ type: "cancel", id: invite.id, email: invite.email })}
                     className="p-2 text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
-                    title="Annulla invito"
+                    title="Rimuovi"
                   >
                     <X className="w-4 h-4" />
                   </button>

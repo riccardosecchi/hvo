@@ -153,6 +153,8 @@ export interface Database {
           email: string;
           invitation_token: string;
           is_confirmed: boolean;
+          has_registered: boolean;
+          registered_at: string | null;
           invited_by: string;
         };
         Insert: {
@@ -161,6 +163,8 @@ export interface Database {
           email: string;
           invitation_token: string;
           is_confirmed?: boolean;
+          has_registered?: boolean;
+          registered_at?: string | null;
           invited_by: string;
         };
         Update: {
@@ -169,6 +173,8 @@ export interface Database {
           email?: string;
           invitation_token?: string;
           is_confirmed?: boolean;
+          has_registered?: boolean;
+          registered_at?: string | null;
           invited_by?: string;
         };
       };
