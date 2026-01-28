@@ -4,14 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
-import { suspendAdmin, reactivateAdmin, removeAdmin, cancelInvite } from "@/lib/supabase/users";
+import { suspendAdmin, reactivateAdmin, removeAdmin, cancelInvite, resetAdminPassword } from "@/lib/supabase/users";
+import { useToast } from "@/components/ui/toast";
 import {
   Copy,
   Check,
   UserPlus,
   Mail,
   Users,
-  Clock,
   Loader2,
   Pause,
   Play,
@@ -21,7 +21,8 @@ import {
   Shield,
   ShieldOff,
   Link2,
-  UserCheck
+  UserCheck,
+  Key
 } from "lucide-react";
 import type { AdminInvite, Profile } from "@/lib/database.types";
 
@@ -35,6 +36,7 @@ interface UserManagementProps {
 export function UserManagement({ invites, profiles, isMasterAdmin, locale }: UserManagementProps) {
   const t = useTranslations("admin.users");
   const router = useRouter();
+  const { showToast } = useToast();
 
   const [email, setEmail] = useState("");
   const [generatedLink, setGeneratedLink] = useState("");
@@ -42,10 +44,11 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{
-    type: "suspend" | "remove" | "cancel";
+    type: "suspend" | "remove" | "cancel" | "resetPassword";
     id: string;
     email: string;
   } | null>(null);
+  const [newPassword, setNewPassword] = useState("");
 
   // Invites where user hasn't registered yet (waiting for registration)
   const waitingForRegistration = invites.filter((i) => !i.is_confirmed && !i.has_registered);
@@ -78,7 +81,7 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
 
     if (existingInvite) {
       if (existingInvite.is_confirmed) {
-        alert("Questo utente è già stato confermato come admin.");
+        showToast("warning", "Utente già confermato", "Questo utente è già stato confermato come admin.");
         setLoading(false);
         return;
       }
@@ -104,11 +107,12 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
 
     if (error) {
       console.error("Error creating invite:", error);
-      alert(`Errore: ${error.message}`);
+      showToast("error", "Errore", error.message);
     } else {
       const link = `${window.location.origin}/${locale}/admin/register?token=${token}`;
       setGeneratedLink(link);
       setEmail("");
+      showToast("success", "Link generato", "Il link di invito è stato creato con successo.");
       router.refresh();
     }
 
@@ -124,7 +128,12 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
   const confirmUser = async (inviteId: string) => {
     setActionLoading(inviteId);
     const supabase = createClient();
-    await supabase.from("admin_invites").update({ is_confirmed: true }).eq("id", inviteId);
+    const { error } = await supabase.from("admin_invites").update({ is_confirmed: true }).eq("id", inviteId);
+    if (error) {
+      showToast("error", "Errore", error.message);
+    } else {
+      showToast("success", "Admin confermato", "L'utente è stato confermato come admin.");
+    }
     router.refresh();
     setActionLoading(null);
   };
@@ -133,7 +142,10 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
     setActionLoading(userId);
     const result = await suspendAdmin(userId);
     if (result.success) {
+      showToast("success", "Admin sospeso", "L'admin è stato sospeso con successo.");
       router.refresh();
+    } else {
+      showToast("error", "Errore", result.error || "Impossibile sospendere l'admin.");
     }
     setActionLoading(null);
     setConfirmDialog(null);
@@ -143,7 +155,10 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
     setActionLoading(userId);
     const result = await reactivateAdmin(userId);
     if (result.success) {
+      showToast("success", "Admin riattivato", "L'admin è stato riattivato con successo.");
       router.refresh();
+    } else {
+      showToast("error", "Errore", result.error || "Impossibile riattivare l'admin.");
     }
     setActionLoading(null);
   };
@@ -152,7 +167,10 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
     setActionLoading(userId);
     const result = await removeAdmin(userId);
     if (result.success) {
+      showToast("success", "Admin rimosso", "L'admin è stato rimosso definitivamente.");
       router.refresh();
+    } else {
+      showToast("error", "Errore", result.error || "Impossibile rimuovere l'admin.");
     }
     setActionLoading(null);
     setConfirmDialog(null);
@@ -162,7 +180,27 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
     setActionLoading(inviteId);
     const result = await cancelInvite(inviteId);
     if (result.success) {
+      showToast("success", "Invito annullato", "L'invito è stato eliminato.");
       router.refresh();
+    } else {
+      showToast("error", "Errore", result.error || "Impossibile eliminare l'invito.");
+    }
+    setActionLoading(null);
+    setConfirmDialog(null);
+  };
+
+  const handleResetPassword = async (userId: string) => {
+    if (!newPassword || newPassword.length < 6) {
+      showToast("warning", "Password non valida", "La password deve essere di almeno 6 caratteri.");
+      return;
+    }
+    setActionLoading(userId);
+    const result = await resetAdminPassword(userId, newPassword);
+    if (result.success) {
+      showToast("success", "Password resettata", `La password per ${result.email} è stata aggiornata.`);
+      setNewPassword("");
+    } else {
+      showToast("error", "Errore", result.error || "Impossibile resettare la password.");
     }
     setActionLoading(null);
     setConfirmDialog(null);
@@ -175,29 +213,54 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="bg-[var(--surface-1)] border border-white/[0.06] rounded-lg max-w-md w-full p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-md bg-red-500/10">
-                <AlertTriangle className="w-5 h-5 text-red-400" />
+              <div className={`p-2 rounded-md ${confirmDialog.type === "resetPassword" ? "bg-blue-500/10" : "bg-red-500/10"}`}>
+                {confirmDialog.type === "resetPassword" ? (
+                  <Key className="w-5 h-5 text-blue-400" />
+                ) : (
+                  <AlertTriangle className="w-5 h-5 text-red-400" />
+                )}
               </div>
               <h3 className="font-semibold text-lg text-white">
                 {confirmDialog.type === "suspend" && "Sospendi Admin"}
                 {confirmDialog.type === "remove" && "Rimuovi Admin"}
                 {confirmDialog.type === "cancel" && "Annulla Invito"}
+                {confirmDialog.type === "resetPassword" && "Resetta Password"}
               </h3>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] mb-6">
-              {confirmDialog.type === "suspend" && (
-                <>Sei sicuro di voler sospendere <strong className="text-white">{confirmDialog.email}</strong>? L&apos;utente non potrà più accedere al pannello admin.</>
-              )}
-              {confirmDialog.type === "remove" && (
-                <>Sei sicuro di voler rimuovere definitivamente <strong className="text-white">{confirmDialog.email}</strong>? Questa azione non può essere annullata.</>
-              )}
-              {confirmDialog.type === "cancel" && (
-                <>Sei sicuro di voler annullare l&apos;invito per <strong className="text-white">{confirmDialog.email}</strong>? Il link di registrazione non sarà più valido.</>
-              )}
-            </p>
+
+            {confirmDialog.type === "resetPassword" ? (
+              <div className="space-y-4 mb-6">
+                <p className="text-sm text-[var(--text-secondary)]">
+                  Inserisci una nuova password per <strong className="text-white">{confirmDialog.email}</strong>
+                </p>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Nuova password (min. 6 caratteri)"
+                  className="w-full h-11 px-4 bg-[var(--surface-2)] border border-white/10 rounded-md text-white placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+                />
+              </div>
+            ) : (
+              <p className="text-sm text-[var(--text-secondary)] mb-6">
+                {confirmDialog.type === "suspend" && (
+                  <>Sei sicuro di voler sospendere <strong className="text-white">{confirmDialog.email}</strong>? L&apos;utente non potrà più accedere al pannello admin.</>
+                )}
+                {confirmDialog.type === "remove" && (
+                  <>Sei sicuro di voler rimuovere definitivamente <strong className="text-white">{confirmDialog.email}</strong>? Questa azione non può essere annullata.</>
+                )}
+                {confirmDialog.type === "cancel" && (
+                  <>Sei sicuro di voler annullare l&apos;invito per <strong className="text-white">{confirmDialog.email}</strong>? Il link di registrazione non sarà più valido.</>
+                )}
+              </p>
+            )}
+
             <div className="flex gap-3 justify-end">
               <button
-                onClick={() => setConfirmDialog(null)}
+                onClick={() => {
+                  setConfirmDialog(null);
+                  setNewPassword("");
+                }}
                 className="px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-white transition-colors"
               >
                 Annulla
@@ -207,12 +270,18 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
                   if (confirmDialog.type === "suspend") handleSuspend(confirmDialog.id);
                   else if (confirmDialog.type === "remove") handleRemove(confirmDialog.id);
                   else if (confirmDialog.type === "cancel") handleCancelInvite(confirmDialog.id);
+                  else if (confirmDialog.type === "resetPassword") handleResetPassword(confirmDialog.id);
                 }}
                 disabled={actionLoading === confirmDialog.id}
-                className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-md hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+                className={`px-4 py-2 text-white text-sm font-medium rounded-md transition-colors disabled:opacity-50 flex items-center gap-2 ${confirmDialog.type === "resetPassword"
+                  ? "bg-blue-500 hover:bg-blue-600"
+                  : "bg-red-500 hover:bg-red-600"
+                  }`}
               >
                 {actionLoading === confirmDialog.id ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
+                ) : confirmDialog.type === "resetPassword" ? (
+                  "Salva Password"
                 ) : (
                   "Conferma"
                 )}
@@ -402,6 +471,13 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
                   </div>
                   {isMasterAdmin && (
                     <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setConfirmDialog({ type: "resetPassword", id: profile.id, email: profile.email })}
+                        className="p-2 text-[var(--text-muted)] hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-colors"
+                        title="Resetta Password"
+                      >
+                        <Key className="w-4 h-4" />
+                      </button>
                       <button
                         onClick={() => setConfirmDialog({ type: "suspend", id: profile.id, email: profile.email })}
                         className="p-2 text-[var(--text-muted)] hover:text-amber-400 hover:bg-amber-500/10 rounded-md transition-colors"

@@ -33,7 +33,15 @@ export function LoginForm({ locale }: LoginFormProps) {
     });
 
     if (signInError) {
-      setError(t("error"));
+      console.error("Login error:", signInError);
+      // Show specific error message for better debugging
+      if (signInError.message.includes("Email not confirmed")) {
+        setError("Email non confermata. Controlla la tua casella di posta.");
+      } else if (signInError.message.includes("Invalid login credentials")) {
+        setError("Credenziali non valide. Verifica email e password.");
+      } else {
+        setError(signInError.message || t("error"));
+      }
       setLoading(false);
       return;
     }

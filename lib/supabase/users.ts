@@ -69,3 +69,27 @@ export async function cancelInvite(inviteId: string): Promise<{ success: boolean
 
     return { success: true };
 }
+
+/**
+ * Reset an admin's password (Master Admin only)
+ */
+export async function resetAdminPassword(
+    userId: string,
+    newPassword: string
+): Promise<{ success: boolean; error?: string; email?: string }> {
+    const response = await fetch("/api/admin/reset-password", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId, newPassword }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        return { success: false, error: data.error };
+    }
+
+    return { success: true, email: data.email };
+}
