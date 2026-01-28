@@ -16,7 +16,7 @@ import {
   ExternalLink,
   FolderOpen,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 interface SidebarProps {
@@ -34,14 +34,42 @@ export function Sidebar({ locale }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMasterAdmin, setIsMasterAdmin] = useState(false);
 
-  const navItems: NavItem[] = [
+  // Check master admin status
+  useEffect(() => {
+    const checkMasterAdmin = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("is_master_admin")
+          .eq("id", user.id)
+          .single();
+
+        if (profile?.is_master_admin) {
+          setIsMasterAdmin(true);
+        }
+      }
+    };
+    checkMasterAdmin();
+  }, []);
+
+  const allNavItems: NavItem[] = [
     { href: `/${locale}/admin/dashboard`, label: t("dashboard"), icon: LayoutDashboard },
     { href: `/${locale}/admin/events`, label: t("events"), icon: CalendarDays },
     { href: `/${locale}/admin/cdn`, label: t("cdn"), icon: FolderOpen },
     { href: `/${locale}/admin/users`, label: t("users"), icon: Users },
     { href: `/${locale}/admin/profile`, label: t("profile"), icon: User },
   ];
+
+  // Filter users link if not master admin
+  const navItems = isMasterAdmin
+    ? allNavItems
+    : allNavItems.filter(item => item.href !== `/${locale}/admin/users`);
+
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -87,11 +115,10 @@ export function Sidebar({ locale }: SidebarProps) {
               key={item.href}
               href={item.href}
               onClick={closeMobile}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
-                isActive
-                  ? "bg-[var(--accent)] text-white"
-                  : "text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
-              }`}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${isActive
+                ? "bg-[var(--accent)] text-white"
+                : "text-[var(--text-secondary)] hover:text-white hover:bg-white/5"
+                }`}
             >
               <Icon className="w-4 h-4" />
               <span>{item.label}</span>
@@ -143,9 +170,8 @@ export function Sidebar({ locale }: SidebarProps) {
 
       {/* Mobile sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[var(--surface-1)] border-r border-white/[0.06] transform transition-transform duration-200 ease-out md:hidden ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[var(--surface-1)] border-r border-white/[0.06] transform transition-transform duration-200 ease-out md:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <NavContent />
       </aside>
