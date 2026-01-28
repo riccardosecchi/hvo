@@ -122,18 +122,27 @@ export interface Database {
           id: string;
           email: string;
           is_master_admin: boolean;
+          is_suspended: boolean;
+          suspended_at: string | null;
+          suspended_by: string | null;
           created_at: string;
         };
         Insert: {
           id: string;
           email: string;
           is_master_admin?: boolean;
+          is_suspended?: boolean;
+          suspended_at?: string | null;
+          suspended_by?: string | null;
           created_at?: string;
         };
         Update: {
           id?: string;
           email?: string;
           is_master_admin?: boolean;
+          is_suspended?: boolean;
+          suspended_at?: string | null;
+          suspended_by?: string | null;
           created_at?: string;
         };
       };

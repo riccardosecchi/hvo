@@ -4,7 +4,23 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
-import { Copy, Check, UserPlus, Mail, Users, Clock, Loader2 } from "lucide-react";
+import { suspendAdmin, reactivateAdmin, removeAdmin, cancelInvite } from "@/lib/supabase/users";
+import {
+  Copy,
+  Check,
+  UserPlus,
+  Mail,
+  Users,
+  Clock,
+  Loader2,
+  Pause,
+  Play,
+  Trash2,
+  X,
+  AlertTriangle,
+  Shield,
+  ShieldOff
+} from "lucide-react";
 import type { AdminInvite, Profile } from "@/lib/database.types";
 
 interface UserManagementProps {
@@ -22,9 +38,16 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
   const [generatedLink, setGeneratedLink] = useState("");
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    type: "suspend" | "remove" | "cancel";
+    id: string;
+    email: string;
+  } | null>(null);
 
   const pendingInvites = invites.filter((i) => !i.is_confirmed);
-  const confirmedProfiles = profiles.filter((p) => !p.is_master_admin);
+  const activeAdmins = profiles.filter((p) => !p.is_master_admin && !p.is_suspended);
+  const suspendedAdmins = profiles.filter((p) => !p.is_master_admin && p.is_suspended);
 
   const generateInviteLink = async () => {
     if (!email) return;
@@ -58,13 +81,106 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
   };
 
   const confirmUser = async (inviteId: string) => {
+    setActionLoading(inviteId);
     const supabase = createClient();
     await supabase.from("admin_invites").update({ is_confirmed: true }).eq("id", inviteId);
     router.refresh();
+    setActionLoading(null);
+  };
+
+  const handleSuspend = async (userId: string) => {
+    setActionLoading(userId);
+    const result = await suspendAdmin(userId);
+    if (result.success) {
+      router.refresh();
+    }
+    setActionLoading(null);
+    setConfirmDialog(null);
+  };
+
+  const handleReactivate = async (userId: string) => {
+    setActionLoading(userId);
+    const result = await reactivateAdmin(userId);
+    if (result.success) {
+      router.refresh();
+    }
+    setActionLoading(null);
+  };
+
+  const handleRemove = async (userId: string) => {
+    setActionLoading(userId);
+    const result = await removeAdmin(userId);
+    if (result.success) {
+      router.refresh();
+    }
+    setActionLoading(null);
+    setConfirmDialog(null);
+  };
+
+  const handleCancelInvite = async (inviteId: string) => {
+    setActionLoading(inviteId);
+    const result = await cancelInvite(inviteId);
+    if (result.success) {
+      router.refresh();
+    }
+    setActionLoading(null);
+    setConfirmDialog(null);
   };
 
   return (
     <div className="space-y-6">
+      {/* Confirmation Dialog */}
+      {confirmDialog && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-[var(--surface-1)] border border-white/[0.06] rounded-lg max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-md bg-red-500/10">
+                <AlertTriangle className="w-5 h-5 text-red-400" />
+              </div>
+              <h3 className="font-semibold text-lg text-white">
+                {confirmDialog.type === "suspend" && "Sospendi Admin"}
+                {confirmDialog.type === "remove" && "Rimuovi Admin"}
+                {confirmDialog.type === "cancel" && "Annulla Invito"}
+              </h3>
+            </div>
+            <p className="text-sm text-[var(--text-secondary)] mb-6">
+              {confirmDialog.type === "suspend" && (
+                <>Sei sicuro di voler sospendere <strong className="text-white">{confirmDialog.email}</strong>? L&apos;utente non potrà più accedere al pannello admin.</>
+              )}
+              {confirmDialog.type === "remove" && (
+                <>Sei sicuro di voler rimuovere definitivamente <strong className="text-white">{confirmDialog.email}</strong>? Questa azione non può essere annullata.</>
+              )}
+              {confirmDialog.type === "cancel" && (
+                <>Sei sicuro di voler annullare l&apos;invito per <strong className="text-white">{confirmDialog.email}</strong>? Il link di registrazione non sarà più valido.</>
+              )}
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmDialog(null)}
+                className="px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-white transition-colors"
+              >
+                Annulla
+              </button>
+              <button
+                onClick={() => {
+                  if (confirmDialog.type === "suspend") handleSuspend(confirmDialog.id);
+                  else if (confirmDialog.type === "remove") handleRemove(confirmDialog.id);
+                  else if (confirmDialog.type === "cancel") handleCancelInvite(confirmDialog.id);
+                }}
+                disabled={actionLoading === confirmDialog.id}
+                className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-md hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {actionLoading === confirmDialog.id ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Conferma"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Invite Section */}
       <div className="bg-[var(--surface-1)] border border-white/[0.06] rounded-lg overflow-hidden">
         <div className="p-4 border-b border-white/[0.06] flex items-center gap-3">
@@ -107,11 +223,10 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
                 />
                 <button
                   onClick={copyLink}
-                  className={`h-10 px-4 rounded-md border transition-colors flex items-center gap-2 ${
-                    copied
+                  className={`h-10 px-4 rounded-md border transition-colors flex items-center gap-2 ${copied
                       ? "bg-green-500/10 border-green-500/30 text-green-400"
                       : "bg-[var(--surface-1)] border-white/[0.06] text-[var(--text-muted)] hover:text-white"
-                  }`}
+                    }`}
                 >
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 </button>
@@ -143,19 +258,33 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
                 className="flex items-center justify-between p-4"
               >
                 <span className="text-sm text-white">{invite.email}</span>
-                <button
-                  onClick={() => confirmUser(invite.id)}
-                  className="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600 transition-colors"
-                >
-                  {t("confirmUser")}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => confirmUser(invite.id)}
+                    disabled={actionLoading === invite.id}
+                    className="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600 transition-colors disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {actionLoading === invite.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      t("confirmUser")
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setConfirmDialog({ type: "cancel", id: invite.id, email: invite.email })}
+                    className="p-2 text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
+                    title="Annulla invito"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Confirmed Admins */}
+      {/* Active Admins */}
       <div className="bg-[var(--surface-1)] border border-white/[0.06] rounded-lg overflow-hidden">
         <div className="p-4 border-b border-white/[0.06] flex items-center gap-3">
           <div className="p-2 rounded-md bg-green-500/10">
@@ -163,17 +292,17 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
           </div>
           <h2 className="font-semibold text-lg text-white">{t("confirmed")}</h2>
           <span className="ml-auto px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 text-xs font-medium">
-            {confirmedProfiles.length}
+            {activeAdmins.length}
           </span>
         </div>
         <div className="p-4">
-          {confirmedProfiles.length === 0 ? (
+          {activeAdmins.length === 0 ? (
             <p className="text-sm text-[var(--text-muted)] text-center py-4">
               No other admins yet
             </p>
           ) : (
             <div className="space-y-2">
-              {confirmedProfiles.map((profile) => (
+              {activeAdmins.map((profile) => (
                 <div
                   key={profile.id}
                   className="flex items-center gap-3 p-3 bg-[var(--surface-2)] rounded-md"
@@ -183,13 +312,101 @@ export function UserManagement({ invites, profiles, isMasterAdmin, locale }: Use
                       {profile.email.charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  <span className="text-sm text-white">{profile.email}</span>
+                  <div className="flex-1">
+                    <span className="text-sm text-white">{profile.email}</span>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <Shield className="w-3 h-3 text-green-400" />
+                      <span className="text-xs text-green-400">Attivo</span>
+                    </div>
+                  </div>
+                  {isMasterAdmin && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setConfirmDialog({ type: "suspend", id: profile.id, email: profile.email })}
+                        className="p-2 text-[var(--text-muted)] hover:text-amber-400 hover:bg-amber-500/10 rounded-md transition-colors"
+                        title="Sospendi"
+                      >
+                        <Pause className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setConfirmDialog({ type: "remove", id: profile.id, email: profile.email })}
+                        className="p-2 text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
+                        title="Rimuovi"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           )}
         </div>
       </div>
+
+      {/* Suspended Admins */}
+      {isMasterAdmin && suspendedAdmins.length > 0 && (
+        <div className="bg-[var(--surface-1)] border border-white/[0.06] rounded-lg overflow-hidden">
+          <div className="p-4 border-b border-white/[0.06] flex items-center gap-3">
+            <div className="p-2 rounded-md bg-red-500/10">
+              <ShieldOff className="w-5 h-5 text-red-400" />
+            </div>
+            <h2 className="font-semibold text-lg text-white">Admin Sospesi</h2>
+            <span className="ml-auto px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 text-xs font-medium">
+              {suspendedAdmins.length}
+            </span>
+          </div>
+          <div className="p-4">
+            <div className="space-y-2">
+              {suspendedAdmins.map((profile) => (
+                <div
+                  key={profile.id}
+                  className="flex items-center gap-3 p-3 bg-[var(--surface-2)] rounded-md opacity-75"
+                >
+                  <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center">
+                    <span className="text-red-400 text-sm font-medium">
+                      {profile.email.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <span className="text-sm text-white">{profile.email}</span>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <ShieldOff className="w-3 h-3 text-red-400" />
+                      <span className="text-xs text-red-400">Sospeso</span>
+                      {profile.suspended_at && (
+                        <span className="text-xs text-[var(--text-muted)] ml-2">
+                          dal {new Date(profile.suspended_at).toLocaleDateString("it-IT")}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleReactivate(profile.id)}
+                      disabled={actionLoading === profile.id}
+                      className="p-2 text-[var(--text-muted)] hover:text-green-400 hover:bg-green-500/10 rounded-md transition-colors disabled:opacity-50"
+                      title="Riattiva"
+                    >
+                      {actionLoading === profile.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Play className="w-4 h-4" />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setConfirmDialog({ type: "remove", id: profile.id, email: profile.email })}
+                      className="p-2 text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
+                      title="Rimuovi"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
